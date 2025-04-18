@@ -1,0 +1,7 @@
+{
+  "name": "starterpack-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
