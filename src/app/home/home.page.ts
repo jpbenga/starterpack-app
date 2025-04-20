@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IonContent, IonImg, IonButton } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
+import { UserService } from '../user.service';
 
 @Component({
   selector: 'app-home',
@@ -10,6 +11,7 @@ import { CommonModule } from '@angular/common';
   imports: [IonContent, IonImg, CommonModule, IonButton],
 })
 export class HomePage {
+  userId!: string;
   thumbnail: string | null = null;
 
   onFileSelected(event: any) {
@@ -37,10 +39,18 @@ export class HomePage {
     reader.readAsDataURL(file);
   }
 
+  validateImage() {
+    console.log('validateImage called');
+  }
+
   // Helper function to get the file extension (optional, for clarity)
   getFileExtension(filename: string): string {
     return '.' + filename.split('.').pop()?.toLowerCase() || '';
   }
 
-  constructor() { }
+  constructor(private userService: UserService) { }
+
+  ngOnInit() {
+    this.userId = this.userService.getUserUuid();
+  }
 }

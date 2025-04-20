@@ -4,5 +4,6 @@
     <ion-button (click)="fileInput.click()">Select Image</ion-button>
   </div>
 
-  <ion-img id="thumbnail" [src]="thumbnail"></ion-img>
+  <ion-img id="thumbnail" [src]="thumbnail"></ion-img>  
+  <ion-button (click)="validateImage()" #validateButton>Validate</ion-button>
 </ion-content>
