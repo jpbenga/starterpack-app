@@ -1,0 +1,42 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; // Pour centrer verticalement dans le contenu
+  }
+  
+  ion-card {
+    width: 100%;
+    max-width: 450px; // Limite la largeur sur grand écran
+  }
+  
+  // Style pour le séparateur "OU"
+  .separator {
+    display: flex;
+    align-items: center;
+    color: var(--ion-color-medium);
+  }
+  
+  .separator-line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: var(--ion-color-step-200, #cccccc); // Ligne discrète
+  }
+  
+  .separator-text {
+    padding: 0 10px; // Espace autour du texte "OU"
+    font-size: 0.9em;
+  }
+  
+  // Style spécifique pour le bouton Google (optionnel)
+  .google-button {
+    // Utilise les variables CSS pour les couleurs Google ou définissez les vôtres
+    --background: #4285F4; // Bleu Google
+    --background-hover: #357ae8;
+    --color: #ffffff; // Texte blanc
+  }
+  
+  // Style pour le message d'erreur
+  .error-message {
+    min-height: 1.2em; // Réserve l'espace même si vide
+  }

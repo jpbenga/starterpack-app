@@ -1,16 +1,17 @@
-// This file can be replaced during build by using the `fileReplacements` array.
-// `ng build` replaces `environment.ts` with `environment.prod.ts`.
-// The list of file replacements can be found in `angular.json`.
+// src/environments/environment.ts
 
-export const environment = {
-  production: false
+// Votre configuration Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCYp6riWjJWjfsH6ZGcvKn1cE_Svr5kcdU", // Attention à ne pas commiter de clés sensibles si le repo est public
+  authDomain: "staterpack-app-backend.firebaseapp.com",
+  projectId: "staterpack-app-backend",
+  storageBucket: "staterpack-app-backend.firebasestorage.app", // Correction: enlever .firebasestorage
+  messagingSenderId: "228743923842",
+  appId: "1:228743923842:web:3b1d38482f2afc1210cc9b"
 };
 
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.
+export const environment = {
+  production: false,
+  cloudFunctionUrl: 'https://generateimage-m36co2ausa-uc.a.run.app',
+  firebaseConfig: firebaseConfig // <<< Ajoutez la config ici
+};

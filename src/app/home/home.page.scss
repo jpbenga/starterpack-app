@@ -1,33 +1,47 @@
-#container {
-  text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-
-  color: #8c8c8c;
-
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
-
-#thumbnail {
+/* Ajoute un peu d'espace autour de la carte principale */
+ion-card {
   margin-top: 20px;
-  max-width: 100px;  /* Changed from 200px to 100px */
-  max-height: 100px; /* Add this line */
+  margin-bottom: 30px;
+}
+
+/* Style pour le conteneur de la miniature */
+.thumbnail-container {
+  margin-top: 25px; /* Espace au-dessus de la miniature */
+  margin-bottom: 15px;
+  display: flex; /* Utilisation de flex pour centrer facilement */
+  justify-content: center; /* Centrage horizontal */
+  align-items: center; /* Centrage vertical */
+  background-color: var(--ion-color-light-tint); /* Fond léger pour délimiter */
+  border-radius: 10px; /* Coins arrondis */
+  padding: 10px;
+  min-height: 150px; /* Hauteur minimale pour la zone même vide */
+  border: 1px dashed var(--ion-color-medium-shade); /* Bordure discrète */
+}
+
+/* Style pour l'image miniature elle-même */
+.thumbnail-img {
+  max-width: 100%; /* S'assure que l'image ne dépasse pas le conteneur */
+  max-height: 250px; /* Limite la hauteur maximale */
+  border-radius: 6px; /* Coins légèrement arrondis pour l'image */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre portée subtile */
+  object-fit: cover; /* S'assure que l'image couvre bien sans se déformer */
+}
+
+/* Style pour les instructions et textes */
+.instructions {
+  color: var(--ion-color-medium-shade);
+  font-size: 0.9em;
+  margin-bottom: 15px;
+}
+
+/* Centrage du texte dans le header de la carte */
+ion-card-header ion-text {
+  display: block;
+  text-align: center;
+  font-weight: 500; /* Un peu plus de poids pour le titre/instruction principale */
+}
+
+/* Optionnel : Ajouter un léger effet au survol/focus sur les boutons */
+ion-button:hover {
+  opacity: 0.9;
 }

@@ -1,9 +1,87 @@
-<ion-content class="ion-padding">
-  <div class="upload-container">
-    <input type="file" accept="image/jpeg, image/png, image/bmp" (change)="onFileSelected($event)" hidden #fileInput>
-    <ion-button (click)="fileInput.click()">Select Image</ion-button>
-  </div>
+<ion-header class="ion-no-border">
+  <ion-toolbar class="modern-toolbar">
+    <ion-title class="ion-text-center modern-title">
+      Starter Pack Generator
+    </ion-title>
 
-  <ion-img id="thumbnail" [src]="thumbnail"></ion-img>  
-  <ion-button (click)="validateImage()" #validateButton>Validate</ion-button>
+    <ion-buttons slot="end">
+      <ng-container *ngIf="authService.user$ | async as user; else showLoginButtons">
+        <ion-button *ngIf="!user.isAnonymous" fill="clear" size="small" (click)="navigateToAccount()">
+          <ion-icon slot="icon-only" name="person-circle-outline" aria-label="Mon compte"></ion-icon>
+        </ion-button>
+        <ion-button *ngIf="!user.isAnonymous" fill="clear" size="small" (click)="logout()">
+          <ion-icon slot="icon-only" name="log-out-outline" aria-label="Déconnexion"></ion-icon>
+        </ion-button>
+
+        <ion-button *ngIf="user.isAnonymous" fill="solid" shape="round" size="small" (click)="navigateToLogin()">
+          <ion-icon slot="start" name="log-in-outline"></ion-icon>
+          Connexion
+        </ion-button>
+
+      </ng-container>
+
+      <ng-template #showLoginButtons>
+        <ion-button fill="solid" shape="round" size="small" (click)="navigateToLogin()">
+           <ion-icon slot="start" name="log-in-outline"></ion-icon>
+           Connexion / Inscription
+        </ion-button>
+      </ng-template>
+    </ion-buttons>
+    </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding modern-content">
+  <ion-card class="modern-card step-card">
+    <ion-card-header class="ion-text-center">
+        <h2 class="modern-step-title">Étape 1 : Choisissez votre photo</h2>
+    </ion-card-header>
+
+    <ion-card-content>
+      <ion-text color="medium" class="ion-text-center instructions">
+        <p>Sélectionnez une photo (JPG, PNG, BMP) qui servira de base pour le visage de votre figurine.</p>
+      </ion-text>
+
+      <div class="thumbnail-container" [class.has-image]="!!thumbnail">
+         <ng-container *ngIf="thumbnail; else imagePlaceholder">
+           <ion-img
+             [src]="thumbnail"
+             class="thumbnail-img"
+             alt="Aperçu de l'image sélectionnée"
+           ></ion-img>
+         </ng-container>
+         <ng-template #imagePlaceholder>
+           <div class="placeholder-content ion-text-center">
+             <ion-icon name="image-outline" color="medium"></ion-icon>
+             <ion-text color="medium"><p>Aperçu de l'image</p></ion-text>
+           </div>
+         </ng-template>
+       </div>
+
+
+      <input
+        type="file"
+        accept="image/jpeg, image/png, image/bmp"
+        (change)="onFileSelected($event)"
+        hidden
+        #fileInput
+      />
+
+      <ion-button class="select-button" expand="block" fill="outline" (click)="fileInput.click()">
+          <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+          Sélectionner une Image
+       </ion-button>
+
+    </ion-card-content>
+  </ion-card>
+
+  <ion-button
+       class="validate-button"
+       expand="block"
+       (click)="validateImage()"
+       [disabled]="!thumbnail"
+     >
+       <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+       Étape 2 : Valider et Générer
+     </ion-button>
+
 </ion-content>
