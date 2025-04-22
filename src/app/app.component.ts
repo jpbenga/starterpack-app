@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
-import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
+import { IonApp, IonRouterOutlet, Platform  } from '@ionic/angular/standalone';
 import { AuthService } from './services/auth.service'; // <<< Importer AuthService
+import { AdMob } from '@capacitor-community/admob';
 
 @Component({
   selector: 'app-root',
@@ -11,13 +12,15 @@ import { AuthService } from './services/auth.service'; // <<< Importer AuthServi
 })
 export class AppComponent {
   constructor(
-    private authService: AuthService // <<< Injecter AuthService
+    private authService: AuthService, // <<< Injecter AuthService
+    private platform: Platform
   ) {
     this.initializeApp();
   }
 
-  initializeApp() {
-    // Appeler la connexion anonyme au démarrage
+  async initializeApp() {
+    await this.platform.ready();
+
     this.authService.signInAnonymouslyIfNeeded().then(user => {
       if (user) {
         console.log('AppComponent: User is ready (anonymous or logged in). UID:', user.uid);
@@ -27,6 +30,12 @@ export class AppComponent {
     }).catch(err => {
         console.error('AppComponent: Error during initial auth state check', err);
     });
-    // Mettez ici d'autres logiques d'initialisation si nécessaire (ex: SplashScreen, StatusBar)
+
+    try {
+       await AdMob.initialize({});
+       console.log('AdMob initialized successfully');
+    } catch (err) {
+       console.error('Error initializing AdMob', err);
+    }
   }
 }
