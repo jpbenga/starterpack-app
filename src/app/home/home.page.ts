@@ -6,7 +6,7 @@ import {
 } from '@ionic/angular/standalone';
 import { CommonModule } from '@angular/common';
 import { addIcons } from 'ionicons';
-import { cloudUploadOutline, checkmarkCircleOutline, imageOutline, alertCircleOutline, logOutOutline, personCircleOutline, logInOutline } from 'ionicons/icons';
+import { cloudUploadOutline, checkmarkCircleOutline, imageOutline, alertCircleOutline, logOutOutline, personCircleOutline, logInOutline, libraryOutline } from 'ionicons/icons';
 import { ApiService } from '../services/api.service';
 import { AuthService } from '../services/auth.service';
 import { Router, RouterModule } from '@angular/router';
@@ -39,7 +39,7 @@ export class HomePage {
     public authService: AuthService,
     private router: Router
   ) {
-    addIcons({ cloudUploadOutline, checkmarkCircleOutline, imageOutline, alertCircleOutline, logOutOutline, personCircleOutline, logInOutline });
+    addIcons({ cloudUploadOutline, checkmarkCircleOutline, imageOutline, alertCircleOutline, logOutOutline, personCircleOutline, logInOutline, libraryOutline  });
   }
 
   ngOnInit() {}

@@ -1,0 +1,15 @@
+.image-card {
+    margin-bottom: 15px;
+  }
+ 
+  .generated-image {
+    width: 100%;
+    height: auto; // ou une hauteur fixe si vous préférez
+    object-fit: cover;
+    display: block;
+  }
+ 
+  ion-card-content p {
+     font-size: 0.8em;
+     color: var(--ion-color-medium-shade);
+  }

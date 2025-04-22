@@ -10,7 +10,7 @@ import { environment } from './environments/environment';
 // --- Imports Firebase ---
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
 import { provideAuth, getAuth } from '@angular/fire/auth';
-// import { provideFirestore, getFirestore } from '@angular/fire/firestore'; // Si vous utilisez Firestore
+import { provideFirestore, getFirestore } from '@angular/fire/firestore'; // Si vous utilisez Firestore
 
 bootstrapApplication(AppComponent, {
   providers: [
@@ -21,7 +21,7 @@ bootstrapApplication(AppComponent, {
     // --- Configuration Firebase ---
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig)), // Utilisez votre config Firebase
     provideAuth(() => getAuth()),
-    // provideFirestore(() => getFirestore()), // Si vous utilisez Firestore
+    provideFirestore(() => getFirestore()),
     // --------------------------
   ],
 });
