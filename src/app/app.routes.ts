@@ -18,8 +18,7 @@ export const routes: Routes = [
   },
   {
     path: 'bibliotheque', // Page protégée
-    loadComponent: () => import('./bibliotheque/bibliotheque.page').then( m => m.BibliothequePage),
-    canActivate: [AuthGuard] // Appliquer le guard ici
+    loadComponent: () => import('./bibliotheque/bibliotheque.page').then( m => m.BibliothequePage)
   },
   {
     path: '',
