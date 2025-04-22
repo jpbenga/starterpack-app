@@ -46,17 +46,38 @@ export class LoginPage {
 
     try {
       const user = await this.authService.signInWithEmail(this.credentials.email, this.credentials.password);
-      await loading.dismiss();
+
       if (user) {
-        this.router.navigate(['/home']); // Redirige vers l'accueil après succès
+        if (user.emailVerified) {
+          // Utilisateur connecté ET email vérifié
+          await loading.dismiss(); // Masquer avant navigation
+          this.router.navigate(['/home']);
+        } else {
+          // Utilisateur connecté MAIS email non vérifié
+          await loading.dismiss(); // Masquer avant navigation/toast
+          await this.presentToast('Connecté ! Veuillez vérifier votre email pour activer complètement votre compte.', 'warning', 'mail-unread-outline');
+          // Rediriger vers une page dédiée pour la vérification
+          this.router.navigate(['/verify-email']); // Assurez-vous que cette route existe
+        }
       } else {
-        // Géré dans le catch normalement, mais sécurité
-        this.errorMessage = "Échec de la connexion.";
+         // Cas peu probable si signInWithEmail réussit sans retourner d'utilisateur, mais sécurité
+         throw new Error('Connexion réussie mais aucun utilisateur retourné.');
       }
     } catch (error: any) {
-      await loading.dismiss();
-      this.errorMessage = error?.message || "Email ou mot de passe incorrect."; // Afficher l'erreur
-      console.error(error);
+      // Gérer les erreurs de connexion (mauvais mdp, utilisateur inexistant etc.)
+      this.errorMessage = error?.message || "Email ou mot de passe incorrect.";
+      console.error("Login Error:", error);
+      // Assurer que le loading est masqué même en cas d'erreur avant le finally (si besoin)
+      // await loading.dismiss(); // Normalement géré par finally
+    } finally {
+        // S'assurer que le loader est toujours masqué
+        // Vérifier si le loader existe toujours avant de le masquer
+        if (loading) {
+            const L = await this.loadingCtrl.getTop(); // Vérifier s'il y a un loader actif
+            if (L) { // Masquer seulement s'il est présent
+                await loading.dismiss();
+            }
+        }
     }
   }
 

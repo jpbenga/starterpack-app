@@ -48,8 +48,8 @@ export class SignupPage {
       const user = await this.authService.signUpWithEmail(this.credentials.email, this.credentials.password);
       await loading.dismiss();
       if (user) {
-        await this.presentToast('Inscription réussie ! Vous êtes connecté.', 'success');
-        this.router.navigate(['/home']); // Redirige vers l'accueil après succès
+        await this.presentToast('Inscription réussie ! Vérifiez vos emails pour activer votre compte.', 'success');
+            this.router.navigate(['/login']); // Rediriger vers login
       } else {
         this.errorMessage = "Échec de l'inscription."; // Au cas où le service ne lèverait pas d'erreur mais ne retournerait pas d'utilisateur
       }

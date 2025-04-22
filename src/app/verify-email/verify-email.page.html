@@ -1,0 +1,44 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="warning">
+    <ion-title>Vérification Email Requise</ion-title>
+     <ion-buttons slot="end">
+        <ion-button (click)="logout()">
+           <ion-icon slot="icon-only" name="log-out-outline" aria-label="Déconnexion"></ion-icon>
+        </ion-button>
+     </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <div class="ion-text-center ion-padding">
+
+    <ion-icon name="mail-unread-outline" size="large" color="warning" class="ion-margin-bottom" style="font-size: 64px;"></ion-icon>
+
+    <h2>Vérifiez votre boîte mail !</h2>
+
+    <p class="ion-margin-top">
+      Un email de vérification a été envoyé à :
+    </p>
+    <p>
+      <strong *ngIf="userEmail">{{ userEmail }}</strong>
+      <em *ngIf="!userEmail">Chargement...</em>
+    </p>
+
+    <p class="ion-margin-top">
+      Cliquez sur le lien contenu dans cet email pour activer complètement votre compte et accéder à toutes les fonctionnalités.
+    </p>
+
+    <ion-button expand="block" class="ion-margin-top" (click)="resendVerificationEmail()" [disabled]="resendDisabled">
+       <ion-icon name="send-outline" slot="start"></ion-icon>
+       Renvoyer l'email
+       <ion-spinner *ngIf="isResending" slot="end" name="crescent"></ion-spinner>
+    </ion-button>
+    <ion-text color="medium" *ngIf="resendDisabled"><small>Veuillez attendre avant de renvoyer.</small></ion-text>
+
+    <ion-button expand="block" fill="outline" class="ion-margin-top" (click)="checkVerificationStatus()">
+       <ion-icon name="refresh-outline" slot="start"></ion-icon>
+       J'ai vérifié mon email, Continuer
+    </ion-button>
+
+  </div>
+</ion-content>

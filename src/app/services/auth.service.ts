@@ -1,6 +1,6 @@
 // src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { Auth, authState, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword, linkWithCredential, EmailAuthProvider } from '@angular/fire/auth';
+import { Auth, authState, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword, linkWithCredential, EmailAuthProvider, sendEmailVerification  } from '@angular/fire/auth';
 import { Observable, of } from 'rxjs';
 import { switchMap, take, tap } from 'rxjs/operators';
 
@@ -93,6 +93,16 @@ export class AuthService {
                 // Créer un nouveau compte directement
                 const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
                 console.log('Signed up with email');
+                if (userCredential?.user) {
+                  try {
+                      await sendEmailVerification(userCredential.user);
+                      console.log('Verification email sent.');
+                  } catch (verificationError) {
+                      console.error('Error sending verification email', verificationError);
+                      // Optionnel: Informer l'utilisateur que l'email n'a pas pu être envoyé
+                      // mais l'inscription a quand même réussi à ce stade.
+                  }
+              }
                 this.anonymousUserId = null; // Réinitialiser
                 return userCredential.user;
             }
