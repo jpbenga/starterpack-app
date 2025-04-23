@@ -11,6 +11,10 @@
   <ion-card *ngIf="authService.user$ | async as user">
     <ion-card-header>
       <ion-card-title>Informations</ion-card-title>
+      <ion-card-subtitle [color]="(authService.isPremium$ | async) ? 'success' : 'medium'">
+        Statut : {{(authService.isPremium$ | async) ? 'Premium' : 'Standard'}}
+        <ion-icon *ngIf="(authService.isPremium$ | async)" name="star" color="warning"></ion-icon>
+      </ion-card-subtitle>
     </ion-card-header>
     <ion-card-content>
       <ion-list lines="none">
@@ -38,6 +42,47 @@
       </ion-list>
     </ion-card-content>
   </ion-card>
+
+  <div *ngIf="!(authService.isPremium$ | async)" class="ion-margin-top">
+      <ion-card color="light">
+          <ion-card-header>
+              <ion-card-title color="warning">
+                  <ion-icon name="star-outline" color="warning"></ion-icon>
+                  Accès Premium
+              </ion-card-title>
+          </ion-card-header>
+          <ion-card-content class="ion-text-center">
+              <ion-text color="medium">
+                  <p>Débloquez la génération d'images illimitée et soutenez le développement !</p>
+              </ion-text>
+              <ion-button expand="block" color="warning" (click)="goToSubscriptionPage()">
+                  <ion-icon slot="start" name="gift-outline"></ion-icon>
+                  Devenir Premium
+              </ion-button>
+          </ion-card-content>
+      </ion-card>
+  </div>
+
+
+  <div *ngIf="isDevelopmentMode" class="debug-section ion-margin-top">
+      <ion-card color="light">
+          <ion-card-header>
+              <ion-card-title color="medium">
+                  <ion-icon name="bug-outline" color="medium"></ion-icon>
+                   Options de Débogage
+                </ion-card-title>
+          </ion-card-header>
+          <ion-card-content>
+              <ion-button expand="block" fill="outline" color="warning" (click)="simulatePremiumToggle()">
+                  <ion-icon slot="start" [name]="(authService.isPremium$ | async) ? 'star-outline' : 'star'"></ion-icon>
+                  {{(authService.isPremium$ | async) ? 'Premium Actif (Simu)' : 'Simuler accès Premium'}}
+              </ion-button>
+              <ion-text color="medium" class="ion-text-center">
+                  <p><small>Ce bouton n'apparaîtra pas en production.</small></p>
+              </ion-text>
+          </ion-card-content>
+      </ion-card>
+  </div>
 
   <ion-button expand="block" color="danger" (click)="logout()" class="ion-margin-top">
     <ion-icon slot="start" name="log-out-outline"></ion-icon>

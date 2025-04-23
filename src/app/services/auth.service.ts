@@ -1,27 +1,50 @@
-// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
-import { Auth, authState, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword, linkWithCredential, EmailAuthProvider, sendEmailVerification  } from '@angular/fire/auth';
-import { Observable, of } from 'rxjs';
-import { switchMap, take, tap } from 'rxjs/operators';
+import { Auth, authState, signInWithPopup, GoogleAuthProvider, signInAnonymously, signOut, User, signInWithEmailAndPassword, createUserWithEmailAndPassword, linkWithCredential, EmailAuthProvider, sendEmailVerification, getIdTokenResult } from '@angular/fire/auth';
+import { Observable, of, BehaviorSubject } from 'rxjs';
+import { switchMap, take, tap, shareReplay, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  readonly user$: Observable<User | null> = authState(this.auth); // Observable de l'état d'authentification
-  private anonymousUserId: string | null = null; // Pour garder une trace si besoin
+  readonly user$: Observable<User | null> = authState(this.auth);
+  private anonymousUserId: string | null = null;
+
+  private _isPremiumSubject = new BehaviorSubject<boolean>(false);
+  public readonly isPremium$: Observable<boolean>;
 
   constructor(private auth: Auth) {
-    // Optionnel: garder l'UID anonyme en mémoire
     this.user$.pipe(take(1)).subscribe(user => {
         if (user?.isAnonymous) {
             this.anonymousUserId = user.uid;
             console.log('AuthService: Anonymous user detected:', this.anonymousUserId);
         }
     });
+
+    this.isPremium$ = this.user$.pipe(
+      switchMap(user => {
+        if (user) {
+          return getIdTokenResult(user, true).then(idTokenResult => {
+            const isPremium = idTokenResult?.claims['premium'] === true;
+            this._isPremiumSubject.next(isPremium);
+            console.log('User claims:', idTokenResult?.claims);
+            return isPremium;
+          }).catch(error => {
+            console.error('Error getting ID token result:', error);
+            this._isPremiumSubject.next(false);
+            return false;
+          });
+        } else {
+          this._isPremiumSubject.next(false);
+          return of(false);
+        }
+      }),
+      shareReplay(1)
+    );
+
+    this.isPremium$.subscribe();
   }
 
-  // Connexion/Inscription Anonyme (si non connecté)
   async signInAnonymouslyIfNeeded(): Promise<User | null> {
     if (!this.auth.currentUser) {
       try {
@@ -37,73 +60,76 @@ export class AuthService {
     return this.auth.currentUser;
   }
 
-  // Connexion Google
+  // --- Méthode signInWithGoogle modifiée ---
   async signInWithGoogle(): Promise<User | null> {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({
+      prompt: 'select_account' // Force l'affichage du sélecteur de compte
+    });
     try {
         const userCredential = await signInWithPopup(this.auth, provider);
-
-        // Tenter de lier si l'utilisateur était anonyme avant
         if (this.anonymousUserId && this.auth.currentUser && !this.auth.currentUser.isAnonymous) {
-            // Note : La liaison directe après popup peut être complexe.
-            // Une approche est de détecter si l'email existe déjà (erreur)
-            // ou de gérer la liaison explicitement.
-            // Pour simplifier ici, on loggue juste.
-             console.log('Signed in with Google. Previous anonymous ID:', this.anonymousUserId);
-             this.anonymousUserId = null; // Réinitialiser l'ID anonyme après liaison/connexion
+            console.log('Signed in with Google. Previous anonymous ID:', this.anonymousUserId);
+            this.anonymousUserId = null;
+        } else if (!this.anonymousUserId && userCredential.user) {
+             this.forceClaimRefresh();
         }
         return userCredential.user;
     } catch (error: any) {
-        // Gérer les erreurs spécifiques (ex: compte existe déjà avec autre provider)
         console.error("Google sign-in error", error);
          if (error.code === 'auth/account-exists-with-different-credential') {
-             // Tenter de lier ? Ou demander à l'utilisateur de se connecter autrement ?
              alert("Un compte existe déjà avec cet email via une autre méthode de connexion.");
          }
         return null;
     }
   }
+  // --- Fin de la méthode modifiée ---
 
-   // Connexion Email/Mot de passe
    async signInWithEmail(email: string, password: string): Promise<User | null> {
        try {
            const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-           this.anonymousUserId = null; // Réinitialiser
+           this.anonymousUserId = null;
            console.log('Signed in with email');
+           this.forceClaimRefresh();
            return userCredential.user;
        } catch (error) {
            console.error("Email sign-in error", error);
-           alert("Email ou mot de passe incorrect."); // Message simple
+           alert("Email ou mot de passe incorrect.");
            return null;
        }
    }
 
-    // Inscription Email/Mot de passe
     async signUpWithEmail(email: string, password: string): Promise<User | null> {
         const currentUser = this.auth.currentUser;
         try {
             if (currentUser && currentUser.isAnonymous) {
-                // Lier le compte anonyme au nouveau compte Email/Password
                 const credential = EmailAuthProvider.credential(email, password);
                 const userCredential = await linkWithCredential(currentUser, credential);
                 console.log('Anonymous account linked with email');
-                this.anonymousUserId = null; // Réinitialiser
+                this.anonymousUserId = null;
+                this.forceClaimRefresh();
+                 if (userCredential.user && !userCredential.user.emailVerified) {
+                    try {
+                        await sendEmailVerification(userCredential.user);
+                        console.log('Verification email sent after linking.');
+                    } catch (verificationError) {
+                        console.error('Error sending verification email after linking', verificationError);
+                    }
+                }
                 return userCredential.user;
             } else {
-                // Créer un nouveau compte directement
                 const userCredential = await createUserWithEmailAndPassword(this.auth, email, password);
                 console.log('Signed up with email');
                 if (userCredential?.user) {
-                  try {
-                      await sendEmailVerification(userCredential.user);
-                      console.log('Verification email sent.');
-                  } catch (verificationError) {
-                      console.error('Error sending verification email', verificationError);
-                      // Optionnel: Informer l'utilisateur que l'email n'a pas pu être envoyé
-                      // mais l'inscription a quand même réussi à ce stade.
-                  }
-              }
-                this.anonymousUserId = null; // Réinitialiser
+                    try {
+                        await sendEmailVerification(userCredential.user);
+                        console.log('Verification email sent.');
+                    } catch (verificationError) {
+                        console.error('Error sending verification email', verificationError);
+                    }
+                }
+                this.anonymousUserId = null;
+                this.forceClaimRefresh();
                 return userCredential.user;
             }
         } catch (error: any) {
@@ -117,21 +143,39 @@ export class AuthService {
         }
     }
 
-  // Déconnexion
   async signOutUser(): Promise<void> {
     try {
-        await signOut(this.auth);
-        this.anonymousUserId = null; // Réinitialiser
-        console.log('User signed out.');
-        // Optionnel : Forcer une connexion anonyme après déconnexion ?
-        // await this.signInAnonymouslyIfNeeded();
+      await signOut(this.auth);
+      this.anonymousUserId = null;
+      this._isPremiumSubject.next(false);
+      console.log('User signed out.');
     } catch (error) {
-        console.error("Sign out error", error);
+      console.error("Sign out error", error);
     }
   }
 
-  // Obtenir l'UID actuel (anonyme ou connecté)
   getCurrentUserId(): string | null {
       return this.auth.currentUser?.uid || null;
+  }
+
+  async forceClaimRefresh(): Promise<boolean> {
+    const user = this.auth.currentUser;
+    if (user) {
+      try {
+        const idTokenResult = await getIdTokenResult(user, true);
+        const isPremium = idTokenResult?.claims['premium'] === true;
+        this._isPremiumSubject.next(isPremium);
+        console.log('Claims refreshed:', idTokenResult?.claims);
+        return isPremium;
+      } catch (error) {
+        console.error('Error forcing claim refresh:', error);
+        this._isPremiumSubject.next(false);
+        return false;
+      }
+    }
+    if (this._isPremiumSubject.value !== false) {
+        this._isPremiumSubject.next(false);
+    }
+    return false;
   }
 }
