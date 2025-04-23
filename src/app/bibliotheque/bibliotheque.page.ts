@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
-  IonIcon, IonText, IonButton, IonImg, Platform // Importer Platform
+  IonIcon, IonButton, Platform // Importer Platform
 } from '@ionic/angular/standalone';
 import { Observable, of, Subscription } from 'rxjs';
 import { switchMap, catchError, tap, take } from 'rxjs/operators';
@@ -24,7 +24,7 @@ import { AdMob, AdOptions, BannerAdOptions, BannerAdSize, BannerAdPosition, Bann
     RouterModule,
     IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
     IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
-    IonIcon, IonText, IonButton, IonImg,
+    IonIcon, IonButton,
     DatePipe
    ]
 })
