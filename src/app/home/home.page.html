@@ -7,7 +7,10 @@
     <ion-buttons slot="end">
       <ng-container *ngIf="authService.user$ | async as user; else showLoginButtons">
         <ng-container *ngIf="!user.isAnonymous">
-          <ion-button fill="clear" size="small" routerLink="/bibliotheque"> <ion-icon slot="icon-only" name="library-outline" aria-label="Bibliothèque"></ion-icon>
+          <ion-icon *ngIf="authService.isPremium$ | async" name="star" color="warning" class="premium-indicator-icon" aria-label="Membre Premium"></ion-icon>
+
+          <ion-button fill="clear" size="small" routerLink="/bibliotheque">
+            <ion-icon slot="icon-only" name="library-outline" aria-label="Bibliothèque"></ion-icon>
           </ion-button>
           <ion-button fill="clear" size="small" (click)="navigateToAccount()">
             <ion-icon slot="icon-only" name="person-circle-outline" aria-label="Mon compte"></ion-icon>
@@ -61,7 +64,6 @@
          </ng-template>
        </div>
 
-
       <input
         type="file"
         accept="image/jpeg, image/png, image/bmp"
@@ -78,14 +80,34 @@
     </ion-card-content>
   </ion-card>
 
-  <ion-button
-       class="validate-button"
-       expand="block"
-       (click)="validateImage()"
-       [disabled]="!thumbnail"
-     >
-       <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
-       Étape 2 : Valider et Générer
-     </ion-button>
+  <div class="validation-section">
+    <ion-button
+        *ngIf="thumbnail"
+        class="validate-button"
+        expand="block"
+        (click)="validateImage()"
+        [disabled]="!(authService.isPremium$ | async)"
+      >
+        <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+        <ng-container *ngIf="authService.isPremium$ | async; else premiumRequiredText">
+          Étape 2 : Valider et Générer
+        </ng-container>
+        <ng-template #premiumRequiredText>
+          Génération Premium Requise
+        </ng-template>
+      </ion-button>
+
+      <ion-card *ngIf="thumbnail && !(authService.isPremium$ | async)" class="premium-prompt-card ion-margin-top">
+        <ion-card-content class="ion-text-center">
+          <ion-icon name="lock-closed-outline" color="warning" size="large"></ion-icon>
+          <ion-text color="warning">
+            <p>La génération d'images est une fonctionnalité réservée aux membres Premium.</p>
+          </ion-text>
+          <ion-button fill="solid" color="warning" size="small" (click)="goToSubscriptionPage()">
+            Devenir Premium
+          </ion-button>
+        </ion-card-content>
+      </ion-card>
+  </div>
 
 </ion-content>
