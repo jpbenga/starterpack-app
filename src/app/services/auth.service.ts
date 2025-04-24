@@ -7,9 +7,9 @@ import { switchMap, take, tap, shareReplay, map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
+  // Déclarations uniques des propriétés
   readonly user$: Observable<User | null> = authState(this.auth);
   private anonymousUserId: string | null = null;
-
   private _isPremiumSubject = new BehaviorSubject<boolean>(false);
   public readonly isPremium$: Observable<boolean>;
 
@@ -42,7 +42,7 @@ export class AuthService {
       shareReplay(1)
     );
 
-    this.isPremium$.subscribe();
+    this.isPremium$.subscribe(); // Déclenche la première vérification
   }
 
   async signInAnonymouslyIfNeeded(): Promise<User | null> {
@@ -60,11 +60,10 @@ export class AuthService {
     return this.auth.currentUser;
   }
 
-  // --- Méthode signInWithGoogle modifiée ---
   async signInWithGoogle(): Promise<User | null> {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({
-      prompt: 'select_account' // Force l'affichage du sélecteur de compte
+      prompt: 'select_account'
     });
     try {
         const userCredential = await signInWithPopup(this.auth, provider);
@@ -83,18 +82,17 @@ export class AuthService {
         return null;
     }
   }
-  // --- Fin de la méthode modifiée ---
 
    async signInWithEmail(email: string, password: string): Promise<User | null> {
        try {
            const userCredential = await signInWithEmailAndPassword(this.auth, email, password);
-           this.anonymousUserId = null;
+           this.anonymousUserId = null; // Ligne unique
            console.log('Signed in with email');
            this.forceClaimRefresh();
            return userCredential.user;
        } catch (error) {
            console.error("Email sign-in error", error);
-           alert("Email ou mot de passe incorrect.");
+           alert("Email ou mot de passe incorrect."); // Ligne unique
            return null;
        }
    }
@@ -150,7 +148,7 @@ export class AuthService {
       this._isPremiumSubject.next(false);
       console.log('User signed out.');
     } catch (error) {
-      console.error("Sign out error", error);
+      console.error("Sign out error", error); // Ligne unique
     }
   }
 

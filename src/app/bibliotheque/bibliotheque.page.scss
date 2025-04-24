@@ -1,15 +1,137 @@
-.image-card {
-    margin-bottom: 15px;
+// Importer les variables globales si nécessaire
+// @import '../../theme/variables.scss';
+
+// Utiliser :host pour définir des variables spécifiques si nécessaire
+:host {
+  // Réutiliser les variables définies dans home.page.scss ou global.scss
+  // --color-bg: #121212;
+  // --color-surface: #1e1e1e;
+  // --color-primary: #1db954;
+  // --color-primary-rgb: 29, 185, 84;
+  // --color-alert: #e50914;
+  // --color-text: #f5f5f5;
+  // --color-glass: rgba(255, 255, 255, 0.08);
+  // --color-border: rgba(255, 255, 255, 0.15);
+  // --color-shadow: rgba(0, 0, 0, 0.3);
+  // --color-medium: rgba(245, 245, 245, 0.6);
+}
+
+// Appliquer le fond sombre au contenu
+ion-content.modern-content {
+  --background: var(--color-bg);
+  color: var(--color-text);
+}
+
+// Style pour le conteneur de chargement
+.loading-container {
+  margin-top: 3rem; // Espace au-dessus
+  ion-spinner {
+    width: 40px; // Taille du spinner
+    height: 40px;
+    // La couleur est définie par color="primary" dans le HTML
+    --color: var(--color-primary); // Assurer la couleur primaire
   }
- 
-  .generated-image {
-    width: 100%;
-    height: auto; // ou une hauteur fixe si vous préférez
-    object-fit: cover;
-    display: block;
+  p {
+    margin-top: 1rem;
+    color: var(--color-medium);
   }
- 
-  ion-card-content p {
-     font-size: 0.8em;
-     color: var(--ion-color-medium-shade);
+}
+
+// Style pour l'état vide
+.empty-state-container {
+  margin-top: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; // Espace entre les éléments
+
+  .empty-state-icon {
+    font-size: 4em; // Grande icône
+    color: var(--color-medium);
+    opacity: 0.7;
   }
+  p {
+    color: var(--color-medium);
+    font-size: 1.1em;
+  }
+  // Le bouton utilise .spotify-button-outline
+}
+
+// Style pour les cartes d'image (réutilise .glass-card)
+ion-card.image-card {
+  background: var(--color-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px var(--color-shadow);
+  padding: 0; // Pas de padding intérieur pour que l'image touche les bords
+  margin-bottom: 1.5rem; // Espace entre les cartes
+  overflow: hidden; // Important pour que l'image respecte le border-radius
+  color: var(--color-text);
+}
+
+// Style pour l'image générée
+.generated-image {
+  display: block; // Assure un bon affichage
+  width: 100%;
+  aspect-ratio: 1 / 1; // Force un ratio carré pour l'image
+  object-fit: cover; // Couvre la zone sans déformer
+  border-bottom: 1px solid var(--color-border); // Ligne de séparation sous l'image
+}
+
+// Style pour le header de la carte (date)
+ion-card-header {
+  padding: 0.5rem 1rem; // Padding réduit
+}
+
+.image-date {
+  font-size: 0.75em; // Petite taille pour la date
+  color: var(--color-medium);
+  text-align: right; // Aligner à droite
+}
+
+// Style pour le contenu de la carte (prompt)
+.image-prompt {
+  padding: 0.5rem 1rem 1rem 1rem; // Padding ajusté
+  p {
+    margin: 0;
+    font-size: 0.8em;
+    color: var(--color-medium);
+    line-height: 1.4; // Meilleure lisibilité pour le texte potentiellement long
+    small { // Inutile si le p est déjà petit
+      color: inherit;
+    }
+  }
+}
+
+// Style du bouton outline (si non global)
+.spotify-button-outline {
+  --border-color: var(--color-primary);
+  --color: var(--color-primary);
+  --border-radius: 50px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  --background-hover: rgba(var(--color-primary-rgb), 0.1);
+  --background-activated: rgba(var(--color-primary-rgb), 0.15);
+  --background-focused: rgba(var(--color-primary-rgb), 0.1);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  margin-top: 1rem;
+  &:hover {
+    opacity: 0.85;
+  }
+}
+
+// Ajuster le header (si non global)
+.modern-toolbar {
+  --background: var(--color-surface);
+  color: var(--color-text);
+  ion-title.modern-title {
+    color: var(--color-text);
+    font-weight: bold;
+  }
+  ion-button, ion-back-button {
+    --color: var(--color-text);
+  }
+}

@@ -1,0 +1,128 @@
+// Importer les variables globales si nécessaire
+// @import '../../theme/variables.scss';
+
+// Utiliser :host pour définir des variables spécifiques si nécessaire
+:host {
+    // Réutiliser les variables définies dans home.page.scss ou global.scss
+    // --color-bg: #121212;
+    // --color-surface: #1e1e1e;
+    // --color-primary: #1db954;
+    // --color-primary-rgb: 29, 185, 84;
+    // --color-alert: #e50914;
+    // --color-text: #f5f5f5;
+    // --color-glass: rgba(255, 255, 255, 0.08);
+    // --color-border: rgba(255, 255, 255, 0.15);
+    // --color-shadow: rgba(0, 0, 0, 0.3);
+    // --color-medium: rgba(245, 245, 245, 0.6);
+  }
+  
+  // Appliquer le fond sombre au contenu de la page d'inscription
+  ion-content.modern-content {
+    --background: var(--color-bg);
+    color: var(--color-text);
+  }
+  
+  // Conteneur pour centrer la carte (identique à login)
+  .center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100%;
+  }
+  
+  // Appliquer le style glassmorphism à la carte (identique à login)
+  ion-card.glass-card {
+    background: var(--color-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 32px var(--color-shadow);
+    padding: 1rem 0.5rem;
+    width: 100%;
+    max-width: 450px;
+    color: var(--color-text);
+  
+    ion-card-title.modern-step-title { // Style spécifique pour le titre si besoin
+      color: var(--color-text);
+      font-weight: 600;
+    }
+  }
+  
+  // Style pour les listes et items (identique à login)
+  .transparent-list {
+    --background: transparent;
+    background: transparent;
+    padding: 0;
+  }
+  
+  .transparent-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --border-color: rgba(var(--color-primary-rgb), 0.3);
+    --highlight-color-focused: transparent;
+    margin-bottom: 0.5rem;
+  }
+  
+  // Style des inputs (identique à login)
+  ion-input.modern-input {
+    --background: rgba(var(--color-primary-rgb), 0.05);
+    --border-radius: 8px;
+    --padding-start: 10px;
+    --padding-end: 10px;
+    --placeholder-color: var(--color-medium);
+    --color: var(--color-text);
+    border-bottom: 1px solid transparent;
+    transition: border-bottom 0.3s ease;
+  
+    ion-icon {
+      color: var(--color-medium);
+      margin-right: 6px;
+    }
+  
+    &.ion-focused {
+      border-bottom: 1px solid var(--color-primary);
+    }
+  }
+  
+  // Message d'erreur (identique à login)
+  .error-message {
+    min-height: 1.2em;
+    small {
+      font-weight: 500;
+    }
+  }
+  
+  // Style du bouton principal (réutiliser .spotify-button si défini globalement)
+  .spotify-button {
+    --border-radius: 50px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    margin-top: 1.5rem; // Marge au-dessus du bouton principal
+    --background: var(--color-primary);
+    --background-hover: var(--color-primary);
+    --background-activated: var(--color-primary);
+    --background-focused: var(--color-primary);
+    --color: #000000;
+  
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+  
+  // Ajuster le header (identique à login, si non global)
+  .modern-toolbar {
+    --background: var(--color-surface);
+    color: var(--color-text);
+    ion-title.modern-title {
+      color: var(--color-text);
+      font-weight: bold;
+    }
+    ion-button, ion-back-button {
+      --color: var(--color-text);
+    }
+  }
+  

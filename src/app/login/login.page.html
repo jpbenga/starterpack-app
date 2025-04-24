@@ -1,24 +1,24 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
+<ion-header class="ion-no-border modern-toolbar">
+  <ion-toolbar> <ion-buttons slot="start">
       <ion-back-button defaultHref="/home" text="Accueil"></ion-back-button>
     </ion-buttons>
-    <ion-title>Connexion / Inscription</ion-title>
+    <ion-title class="modern-title">Connexion / Inscription</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="login-container">
+<ion-content [fullscreen]="true" class="ion-padding modern-content">
+  <div class="center-container">
 
-    <ion-card>
+    <ion-card class="glass-card">
       <ion-card-header class="ion-text-center">
-        <ion-card-title>Accès Membre</ion-card-title>
+        <ion-card-title class="modern-step-title">Accès Membre</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        <ion-list lines="full" class="ion-no-margin ion-no-padding">
-          <ion-item>
+        <ion-list lines="none" class="transparent-list">
+          <ion-item class="transparent-item">
             <ion-input
+              class="modern-input"
               label="Email"
               labelPlacement="floating"
               type="email"
@@ -33,8 +33,9 @@
             </ion-input>
           </ion-item>
 
-          <ion-item>
+          <ion-item class="transparent-item">
             <ion-input
+              class="modern-input"
               label="Mot de passe"
               labelPlacement="floating"
               type="password"
@@ -50,21 +51,21 @@
         </ion-list>
 
         <div class="error-message ion-padding-top ion-text-center" *ngIf="errorMessage">
-          <ion-text color="danger">
-            <small>{{ errorMessage }}</small>
+          <ion-text color="danger"> <small>{{ errorMessage }}</small>
           </ion-text>
         </div>
 
         <ion-grid class="ion-margin-top">
           <ion-row>
             <ion-col>
-              <ion-button expand="block" type="submit" (click)="loginEmail()" [disabled]="!credentials.email || !credentials.password">
+              <ion-button class="spotify-button" expand="block" type="submit" (click)="loginEmail()" [disabled]="!credentials.email || !credentials.password">
                 <ion-icon slot="start" name="log-in-outline"></ion-icon>
                 Connexion
               </ion-button>
             </ion-col>
             <ion-col>
-              <ion-button expand="block" fill="outline" (click)="navigateToSignup()"> <ion-icon slot="start" name="person-add-outline"></ion-icon>
+              <ion-button class="spotify-button-outline" expand="block" fill="outline" (click)="navigateToSignup()">
+                 <ion-icon slot="start" name="person-add-outline"></ion-icon>
                 Inscription
               </ion-button>
             </ion-col>
@@ -77,7 +78,7 @@
           <span class="separator-line"></span>
         </div>
 
-        <ion-button expand="block" class="google-button" (click)="loginGoogle()">
+        <ion-button expand="block" class="spotify-button" (click)="loginGoogle()">
            <ion-icon slot="start" name="logo-google"></ion-icon>
            Continuer avec Google
          </ion-button>

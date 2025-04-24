@@ -1,23 +1,24 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
+<ion-header class="ion-no-border modern-toolbar">
+  <ion-toolbar> <ion-buttons slot="start">
       <ion-back-button defaultHref="/login" text="Connexion"></ion-back-button>
     </ion-buttons>
-    <ion-title>Inscription</ion-title>
+    <ion-title class="modern-title">Inscription</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div class="signup-container">
-    <ion-card>
+<ion-content [fullscreen]="true" class="ion-padding modern-content">
+  <div class="center-container">
+
+    <ion-card class="glass-card">
       <ion-card-header class="ion-text-center">
-        <ion-card-title>Créer un compte</ion-card-title>
+        <ion-card-title class="modern-step-title">Créer un compte</ion-card-title>
       </ion-card-header>
 
       <ion-card-content>
-        <ion-list lines="full" class="ion-no-margin ion-no-padding">
-          <ion-item>
+        <ion-list lines="none" class="transparent-list">
+          <ion-item class="transparent-item">
             <ion-input
+              class="modern-input"
               label="Email"
               labelPlacement="floating"
               type="email"
@@ -32,8 +33,9 @@
             </ion-input>
           </ion-item>
 
-          <ion-item>
+          <ion-item class="transparent-item">
             <ion-input
+              class="modern-input"
               label="Mot de passe"
               labelPlacement="floating"
               type="password"
@@ -45,8 +47,8 @@
             >
              <ion-icon name="lock-closed-outline" slot="start" aria-hidden="true"></ion-icon>
             </ion-input>
-          </ion-item>
-           </ion-list>
+            </ion-item>
+            </ion-list>
 
         <div class="error-message ion-padding-top ion-text-center" *ngIf="errorMessage">
           <ion-text color="danger">
@@ -54,7 +56,7 @@
           </ion-text>
         </div>
 
-        <ion-button class="ion-margin-top" expand="block" type="submit" (click)="signupEmail()" [disabled]="!credentials.email || !credentials.password">
+        <ion-button class="ion-margin-top spotify-button" expand="block" type="submit" (click)="signupEmail()" [disabled]="!credentials.email || !credentials.password">
           <ion-icon slot="start" name="person-add-outline"></ion-icon>
           S'inscrire
         </ion-button>

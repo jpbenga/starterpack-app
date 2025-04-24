@@ -1,2 +1,127 @@
 // For information on how to create your own theme, please see:
 // http://ionicframework.com/docs/theming/
+
+// :root contient les variables CSS globales pour l'application
+:root {
+
+    /* Vos variables de thème Dark Mode */
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-primary: #1db954; // Vert Spotify
+    --color-primary-rgb: 29, 185, 84; // Composantes RGB pour rgba
+    --color-alert: #e50914; // Rouge Netflix
+    --color-text: #f5f5f5;
+    --color-glass: rgba(255, 255, 255, 0.08);
+    --color-border: rgba(255, 255, 255, 0.15);
+    --color-shadow: rgba(0, 0, 0, 0.3);
+    --color-medium: rgba(245, 245, 245, 0.6);
+    --color-warning: #ffd700; // Or pour les étoiles/warnings
+    --color-success: #2dd36f; // Vert succès
+  
+    /** Ionic CSS Variables **/
+    /* Redéfinition des couleurs Ionic pour le thème sombre */
+  
+    /* Primary */
+    --ion-color-primary: var(--color-primary);
+    --ion-color-primary-rgb: var(--color-primary-rgb);
+    --ion-color-primary-contrast: #000000; // Texte noir sur fond vert
+    --ion-color-primary-contrast-rgb: 0,0,0;
+    --ion-color-primary-shade: #1aa34a; // Version plus sombre de primary
+    --ion-color-primary-tint: #34bf61; // Version plus claire de primary
+  
+    /* Secondary - Exemple (Adaptez si vous utilisez secondary) */
+    --ion-color-secondary: #3d3d3d; // Un gris foncé
+    --ion-color-secondary-rgb: 61,61,61;
+    --ion-color-secondary-contrast: #ffffff;
+    --ion-color-secondary-contrast-rgb: 255,255,255;
+    --ion-color-secondary-shade: #363636;
+    --ion-color-secondary-tint: #505050;
+  
+    /* Tertiary - Exemple (Adaptez si vous utilisez tertiary) */
+    --ion-color-tertiary: #525252; // Un autre gris
+    --ion-color-tertiary-rgb: 82,82,82;
+    --ion-color-tertiary-contrast: #ffffff;
+    --ion-color-tertiary-contrast-rgb: 255,255,255;
+    --ion-color-tertiary-shade: #484848;
+    --ion-color-tertiary-tint: #636363;
+  
+    /* Success */
+    --ion-color-success: var(--color-success);
+    --ion-color-success-rgb: 45,211,111;
+    --ion-color-success-contrast: #ffffff;
+    --ion-color-success-contrast-rgb: 255,255,255;
+    --ion-color-success-shade: #28ba62;
+    --ion-color-success-tint: #42d77d;
+  
+    /* Warning */
+    --ion-color-warning: var(--color-warning);
+    --ion-color-warning-rgb: 255,215,0;
+    --ion-color-warning-contrast: #000000; // Texte noir sur fond or
+    --ion-color-warning-contrast-rgb: 0,0,0;
+    --ion-color-warning-shade: #e0bd00;
+    --ion-color-warning-tint: #ffdb1a;
+  
+    /* Danger */
+    --ion-color-danger: var(--color-alert);
+    --ion-color-danger-rgb: 229,9,20;
+    --ion-color-danger-contrast: #ffffff;
+    --ion-color-danger-contrast-rgb: 255,255,255;
+    --ion-color-danger-shade: #ca0812;
+    --ion-color-danger-tint: #e7222b;
+  
+    /* Dark - Utiliser une nuance de gris/surface */
+    --ion-color-dark: #2f2f2f; // Un gris plus foncé que surface
+    --ion-color-dark-rgb: 47,47,47;
+    --ion-color-dark-contrast: #ffffff;
+    --ion-color-dark-contrast-rgb: 255,255,255;
+    --ion-color-dark-shade: #292929;
+    --ion-color-dark-tint: #444444;
+  
+    /* Medium - Utiliser la variable medium définie */
+    --ion-color-medium: var(--color-medium);
+    --ion-color-medium-rgb: 245,245,245; // RGB sans l'alpha pour Ionic
+    --ion-color-medium-contrast: #000000; // Contraste sur fond gris clair (ajuster si besoin)
+    --ion-color-medium-contrast-rgb: 0,0,0;
+    --ion-color-medium-shade: #d8d8d8; // Version plus sombre de f5f5f5 (approximatif)
+    --ion-color-medium-tint: #f6f6f6; // Version plus claire
+  
+    /* Light - Utiliser la couleur de surface comme base "light" dans ce thème sombre */
+    --ion-color-light: var(--color-surface);
+    --ion-color-light-rgb: 30,30,30;
+    --ion-color-light-contrast: #ffffff; // Texte blanc sur fond gris foncé
+    --ion-color-light-contrast-rgb: 255,255,255;
+    --ion-color-light-shade: #1a1a1a;
+    --ion-color-light-tint: #353535;
+  
+    /* Définition des couleurs de base de l'application */
+    --ion-text-color: var(--color-text);
+    --ion-text-color-rgb: 245,245,245;
+  
+    --ion-background-color: var(--color-bg);
+    --ion-background-color-rgb: 18,18,18;
+  
+    --ion-border-color: var(--color-border); // Couleur de bordure par défaut
+  
+    --ion-item-background: transparent; // Fond transparent pour les items par défaut
+    --ion-card-background: var(--color-surface); // Fond par défaut des cartes (avant glass)
+  
+    /* Ajustements spécifiques pour les composants Ionic en mode sombre */
+    --ion-toolbar-background: var(--color-surface);
+    --ion-tab-bar-background: var(--color-surface);
+    --ion-item-border-color: var(--ion-border-color); // Ligne sous les items
+    --ion-item-color: var(--ion-text-color); // Couleur du texte dans les items
+  
+    // ... autres variables Ionic que vous pourriez vouloir ajuster
+  }
+  
+  /* Optionnel: Styles spécifiques pour le dark mode si vous utilisez les préférences système */
+  /*
+  @media (prefers-color-scheme: dark) {
+    body {
+       // Vous pouvez définir les variables ici aussi si vous préférez séparer
+       // --color-bg: #121212;
+       // ... etc ...
+    }
+  }
+  */
+  

@@ -4,7 +4,8 @@ import { RouterModule } from '@angular/router';
 import {
   IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
-  IonIcon, IonButton, Platform // Importer Platform
+  IonIcon, IonButton, Platform,
+  IonImg // <<< Importé ici
 } from '@ionic/angular/standalone';
 import { Observable, of, Subscription } from 'rxjs';
 import { switchMap, catchError, tap, take } from 'rxjs/operators';
@@ -13,6 +14,7 @@ import { imagesOutline, arrowBackOutline } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { FirestoreService, GeneratedImageData } from '../services/firestore.service';
 import { AdMob, AdOptions, BannerAdOptions, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, AdLoadInfo } from '@capacitor-community/admob';
+import { PluginListenerHandle } from '@capacitor/core';
 
 @Component({
   selector: 'app-bibliotheque',
@@ -25,6 +27,7 @@ import { AdMob, AdOptions, BannerAdOptions, BannerAdSize, BannerAdPosition, Bann
     IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
     IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
     IonIcon, IonButton,
+    IonImg, // <<< Ajouté ici dans le tableau imports
     DatePipe
    ]
 })
@@ -35,43 +38,64 @@ export class BibliothequePage implements OnInit, OnDestroy {
   userId: string | null = null;
   isPremium = false;
   private authSubscription: Subscription | null = null;
+  // AdMob Listeners - Correction type si nécessaire
+  private bannerListeners: PluginListenerHandle[] = [];
 
   constructor(
     private authService: AuthService,
     private firestoreService: FirestoreService,
-    private platform: Platform // Injecter Platform
+    private platform: Platform
   ) {
     addIcons({ imagesOutline, arrowBackOutline });
    }
 
   ngOnInit() {
     this.authSubscription = this.authService.user$.subscribe(user => {
-       user?.getIdTokenResult().then(idTokenResult => {
-          this.isPremium = idTokenResult.claims['premium'] === true;
-          console.log('User premium status:', this.isPremium);
-          this.loadImages(user?.uid);
-       }).catch(err => {
-           console.error("Error getting token results for premium check", err);
-           this.isPremium = false; // Assumer non premium en cas d'erreur
-           this.loadImages(user?.uid);
-       });
+        // Utiliser forceClaimRefresh pour être sûr d'avoir les derniers claims
+        this.authService.forceClaimRefresh().then(isPremium => {
+            this.isPremium = isPremium;
+            console.log('BibliothequePage: User premium status:', this.isPremium);
+            this.loadImages(user?.uid); // Charger les images après avoir le statut
+            // Gérer la bannière AdMob en fonction du statut premium
+            if (!this.isPremium) {
+                this.showBannerAd();
+            } else {
+                this.hideAndRemoveBanner();
+            }
+        }).catch(err => {
+            console.error("BibliothequePage: Error getting token results for premium check", err);
+            this.isPremium = false; // Assumer non premium en cas d'erreur
+            this.loadImages(user?.uid);
+            this.showBannerAd(); // Montrer la bannière si erreur
+        });
     });
   }
 
   ngOnDestroy() {
      this.authSubscription?.unsubscribe();
-     AdMob.hideBanner().catch(err => console.error('Error hiding banner on destroy', err));
-     AdMob.removeBanner().catch(err => console.error('Error removing banner on destroy', err));
+     this.removeBannerListeners(); // Nettoyer les listeners spécifiques à la bannière
+     this.hideAndRemoveBanner();
   }
 
   loadImages(uid: string | null | undefined) {
     this.isLoading = true;
     if (uid) {
         this.userId = uid;
+        // Si l'utilisateur n'est pas premium, on ne charge pas les images (ou on affiche un message)
+        // Car les règles de sécurité devraient bloquer l'accès de toute façon
+        if (!this.isPremium) {
+            console.log("BibliothequePage: User is not premium. Not loading images.");
+            this.images$ = of([]); // Retourner un tableau vide
+            this.isLoading = false;
+            // Optionnel: Afficher un message indiquant que l'accès est réservé aux premiums
+            return;
+        }
+        // Si premium, charger les images
         this.images$ = this.firestoreService.getUserImages(uid).pipe(
             tap(() => this.isLoading = false),
             catchError(error => {
                 console.error('Erreur lors du chargement des images:', error);
+                // Gérer l'erreur (ex: permission refusée par les règles Firestore)
                 this.isLoading = false;
                 return of([]);
             })
@@ -83,47 +107,62 @@ export class BibliothequePage implements OnInit, OnDestroy {
     }
   }
 
-  async ionViewWillEnter() {
+  ionViewWillEnter() {
      console.log('ionViewWillEnter BibliothequePage, isPremium:', this.isPremium);
-     // Peut nécessiter une vérification que isPremium est bien défini (asynchrone)
-     // Ou s'assurer que l'état est lu avant via ngOnInit/Resolver/etc.
-     if (this.authSubscription && !this.isPremium) { // Vérifier aussi que la souscription existe (ngOnInit a tourné)
-       await this.showBannerAd();
-     } else if (!this.authSubscription) {
-        // Gérer le cas où la page s'affiche avant que ngOnInit ait pu lire le statut
-        console.warn("Auth status not confirmed yet in ionViewWillEnter");
-        // Option: attendre un peu ou relancer la lecture du statut
-     }
+     // Le statut premium est maintenant géré dans ngOnInit via forceClaimRefresh
+     // La logique AdMob est aussi dans ngOnInit
   }
 
-  async ionViewWillLeave() {
+  ionViewWillLeave() {
     console.log('ionViewWillLeave BibliothequePage');
-    await AdMob.hideBanner().catch(err => console.error('Error hiding banner', err));
-    await AdMob.removeBanner().catch(err => console.error('Error removing banner', err));
+    this.removeBannerListeners();
+    this.hideAndRemoveBanner();
   }
 
   async showBannerAd() {
-     const adUnitId = this.platform.is('ios') ? 'ca-app-pub-3940256099942544/2934735716' : 'ca-app-pub-3940256099942544/6300978111';
+    if (this.isPremium || !this.platform.is('capacitor')) {
+        console.log('BibliothequePage: Skipping banner ad (premium or not on capacitor).');
+        return;
+    }
+    await this.removeBannerListeners();
 
-     const options: BannerAdOptions = {
-         adId: adUnitId,
-         adSize: BannerAdSize.ADAPTIVE_BANNER,
-         position: BannerAdPosition.BOTTOM_CENTER,
-         margin: 0,
-         isTesting: true, // Mettre à false en production avec vos vrais ID
-     };
+    const adUnitId = this.platform.is('ios') ? 'ca-app-pub-3940256099942544/2934735716' : 'ca-app-pub-3940256099942544/6300978111';
+    const options: BannerAdOptions = {
+        adId: adUnitId,
+        adSize: BannerAdSize.ADAPTIVE_BANNER,
+        position: BannerAdPosition.BOTTOM_CENTER,
+        margin: 0,
+        isTesting: true,
+    };
 
-     try {
-         console.log('Attempting to show banner ad');
-          AdMob.addListener(BannerAdPluginEvents.Loaded as any, (info: AdLoadInfo) => { console.log('Banner Ad Loaded', info); });
-          AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error: any) => { console.error('Banner Ad Failed to Load', error); });
-          AdMob.addListener(BannerAdPluginEvents.Opened, () => console.log('Banner Ad Opened'));
-          AdMob.addListener(BannerAdPluginEvents.Closed, () => console.log('Banner Ad Closed'));
+    try {
+        console.log('BibliothequePage: Attempting to show banner ad');
+        const loadedHandle = await AdMob.addListener(BannerAdPluginEvents.Loaded as any, (info: AdLoadInfo) => { console.log('Bibliotheque Banner Ad Loaded', info); });
+        const failedLoadHandle = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad as any, (error: any) => { console.error('Bibliotheque Banner Ad Failed to Load', error); });
+        this.bannerListeners.push(loadedHandle, failedLoadHandle);
 
-         await AdMob.showBanner(options);
-         console.log('Banner ad should be visible');
-     } catch (err) {
-         console.error('Error showing banner ad', err);
-     }
+        await AdMob.showBanner(options);
+        console.log('Bibliotheque banner ad should be visible');
+    } catch (err) {
+        console.error('Bibliotheque: Error showing banner ad', err);
+    }
+  }
+
+  async hideAndRemoveBanner() {
+    if (!this.platform.is('capacitor')) return;
+    await AdMob.hideBanner().catch(err => console.warn('Bibliotheque: Error hiding banner', err));
+    await AdMob.removeBanner().catch(err => console.warn('Bibliotheque: Error removing banner', err));
+  }
+
+  async removeBannerListeners(): Promise<void> {
+    try {
+        for (const handle of this.bannerListeners) {
+            await handle?.remove();
+        }
+    } catch (err) {
+        console.error("Error removing banner listeners", err);
+    } finally {
+        this.bannerListeners = [];
+    }
   }
 }

@@ -1,42 +1,129 @@
-.login-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%; // Pour centrer verticalement dans le contenu
+// Importer les variables globales si elles sont définies dans un fichier séparé
+// @import '../../theme/variables.scss'; // Exemple
+
+// Utiliser :host pour définir des variables spécifiques si nécessaire
+:host {
+  // Réutiliser les variables définies dans home.page.scss ou global.scss
+  // Si non définies globalement, les redéfinir ici :
+  // --color-bg: #121212;
+  // --color-surface: #1e1e1e;
+  // --color-primary: #1db954;
+  // --color-primary-rgb: 29, 185, 84;
+  // --color-alert: #e50914;
+  // --color-text: #f5f5f5;
+  // --color-glass: rgba(255, 255, 255, 0.08);
+  // --color-border: rgba(255, 255, 255, 0.15);
+  // --color-shadow: rgba(0, 0, 0, 0.3);
+  // --color-medium: rgba(245, 245, 245, 0.6);
+}
+
+// Appliquer le fond sombre au contenu de la page de connexion
+ion-content.modern-content {
+  --background: var(--color-bg);
+  color: var(--color-text);
+}
+
+// Conteneur pour centrer la carte
+.center-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%; // Assure que le conteneur prend toute la hauteur disponible
+}
+
+// Appliquer le style glassmorphism à la carte de connexion
+ion-card.glass-card {
+  background: var(--color-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); // Pour Safari
+  border-radius: 1rem; // 16px
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px var(--color-shadow);
+  padding: 1rem 0.5rem; // Ajuster le padding si nécessaire
+  width: 100%;
+  max-width: 450px; // Limite la largeur sur grand écran
+  color: var(--color-text);
+}
+
+// Style pour les listes et items dans la carte (rendre transparents)
+.transparent-list {
+  --background: transparent;
+  background: transparent;
+  padding: 0; // Retirer padding par défaut
+}
+
+.transparent-item {
+  --background: transparent;
+  --padding-start: 0; // Ajuster padding si nécessaire
+  --inner-padding-end: 0;
+  --border-color: rgba(var(--color-primary-rgb), 0.3); // Ligne de séparation subtile
+  --highlight-color-focused: transparent; // Pas de surlignage au focus
+  margin-bottom: 0.5rem; // Espace entre les items
+}
+
+// Style des inputs
+ion-input.modern-input {
+  --background: rgba(var(--color-primary-rgb), 0.05); // Fond très léger
+  --border-radius: 8px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --placeholder-color: var(--color-medium);
+  --color: var(--color-text); // Couleur du texte saisi
+  border-bottom: 1px solid transparent; // Masquer la ligne par défaut de l'item
+  transition: border-bottom 0.3s ease;
+
+  ion-icon {
+    color: var(--color-medium); // Couleur des icônes dans les inputs
+    margin-right: 6px;
   }
-  
-  ion-card {
-    width: 100%;
-    max-width: 450px; // Limite la largeur sur grand écran
+
+  // Style au focus
+  &.ion-focused {
+    border-bottom: 1px solid var(--color-primary);
   }
-  
-  // Style pour le séparateur "OU"
-  .separator {
-    display: flex;
-    align-items: center;
-    color: var(--ion-color-medium);
+}
+
+// Style pour le séparateur "OU"
+.separator {
+  display: flex;
+  align-items: center;
+  color: var(--color-medium);
+  margin: 1.5rem 0; // Ajouter de la marge verticale
+}
+
+.separator-line {
+  flex-grow: 1;
+  height: 1px;
+  background-color: var(--color-border); // Utiliser la variable border
+}
+
+.separator-text {
+  padding: 0 15px; // Espace autour du texte "OU"
+  font-size: 0.9em;
+  font-weight: 500;
+}
+
+// Appliquer les styles de boutons globaux (pas besoin de redéfinir ici si déjà fait)
+// .spotify-button { ... }
+// .spotify-button-outline { ... }
+
+// Message d'erreur
+.error-message {
+  min-height: 1.2em; // Réserve l'espace
+  small {
+    font-weight: 500;
   }
-  
-  .separator-line {
-    flex-grow: 1;
-    height: 1px;
-    background-color: var(--ion-color-step-200, #cccccc); // Ligne discrète
+}
+
+// Ajuster le header (si non défini globalement)
+.modern-toolbar {
+  --background: var(--color-surface);
+  color: var(--color-text);
+  ion-title.modern-title {
+    color: var(--color-text);
+    font-weight: bold;
   }
-  
-  .separator-text {
-    padding: 0 10px; // Espace autour du texte "OU"
-    font-size: 0.9em;
+  ion-button, ion-back-button {
+    --color: var(--color-text);
   }
-  
-  // Style spécifique pour le bouton Google (optionnel)
-  .google-button {
-    // Utilise les variables CSS pour les couleurs Google ou définissez les vôtres
-    --background: #4285F4; // Bleu Google
-    --background-hover: #357ae8;
-    --color: #ffffff; // Texte blanc
-  }
-  
-  // Style pour le message d'erreur
-  .error-message {
-    min-height: 1.2em; // Réserve l'espace même si vide
-  }
+}

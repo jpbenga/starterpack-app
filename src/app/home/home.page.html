@@ -1,66 +1,61 @@
-<ion-header class="ion-no-border">
-  <ion-toolbar class="modern-toolbar">
-    <ion-title class="ion-text-center modern-title">
-      Starter Pack Generator
-    </ion-title>
-
+<ion-header class="modern-toolbar">
+  <ion-toolbar>
+    <ion-title class="modern-title">Starter Pack Generator</ion-title>
     <ion-buttons slot="end">
       <ng-container *ngIf="authService.user$ | async as user; else showLoginButtons">
         <ng-container *ngIf="!user.isAnonymous">
-          <ion-button fill="clear" size="small" routerLink="/bibliotheque"> <ion-icon slot="icon-only" name="library-outline" aria-label="Bibliothèque"></ion-icon>
+          <ion-icon *ngIf="authService.isPremium$ | async" name="star" class="premium-icon"></ion-icon>
+          <ion-button fill="clear" size="small" routerLink="/bibliotheque">
+            <ion-icon slot="icon-only" name="library-outline"></ion-icon>
           </ion-button>
           <ion-button fill="clear" size="small" (click)="navigateToAccount()">
-            <ion-icon slot="icon-only" name="person-circle-outline" aria-label="Mon compte"></ion-icon>
+            <ion-icon slot="icon-only" name="person-circle-outline"></ion-icon>
           </ion-button>
           <ion-button fill="clear" size="small" (click)="logout()">
-            <ion-icon slot="icon-only" name="log-out-outline" aria-label="Déconnexion"></ion-icon>
+            <ion-icon slot="icon-only" name="log-out-outline"></ion-icon>
           </ion-button>
         </ng-container>
 
-        <ion-button *ngIf="user.isAnonymous" fill="solid" shape="round" size="small" (click)="navigateToLogin()">
+        <ion-button *ngIf="user.isAnonymous" fill="solid" shape="round" class="spotify-button" (click)="navigateToLogin()">
           <ion-icon slot="start" name="log-in-outline"></ion-icon>
           Connexion
         </ion-button>
-
       </ng-container>
 
       <ng-template #showLoginButtons>
-        <ion-button fill="solid" shape="round" size="small" (click)="navigateToLogin()">
-           <ion-icon slot="start" name="log-in-outline"></ion-icon>
-           Connexion / Inscription
+        <ion-button fill="solid" shape="round" class="spotify-button" (click)="navigateToLogin()">
+          <ion-icon slot="start" name="log-in-outline"></ion-icon>
+          Connexion / Inscription
         </ion-button>
       </ng-template>
     </ion-buttons>
-    </ion-toolbar>
+  </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding modern-content">
-  <ion-card class="modern-card step-card">
+<ion-content class="modern-content" [fullscreen]="true">
+  <ion-card class="glass-card">
     <ion-card-header class="ion-text-center">
-        <h2 class="modern-step-title">Étape 1 : Choisissez votre photo</h2>
+      <h2 class="modern-step-title">Étape 1 : Choisissez votre photo</h2>
     </ion-card-header>
 
     <ion-card-content>
-      <ion-text color="medium" class="ion-text-center instructions">
+      <ion-text color="light" class="instructions">
         <p>Sélectionnez une photo (JPG, PNG, BMP) qui servira de base pour le visage de votre figurine.</p>
       </ion-text>
 
       <div class="thumbnail-container" [class.has-image]="!!thumbnail">
-         <ng-container *ngIf="thumbnail; else imagePlaceholder">
-           <ion-img
-             [src]="thumbnail"
-             class="thumbnail-img"
-             alt="Aperçu de l'image sélectionnée"
-           ></ion-img>
-         </ng-container>
-         <ng-template #imagePlaceholder>
-           <div class="placeholder-content ion-text-center">
-             <ion-icon name="image-outline" color="medium"></ion-icon>
-             <ion-text color="medium"><p>Aperçu de l'image</p></ion-text>
-           </div>
-         </ng-template>
-       </div>
-
+        <ng-container *ngIf="thumbnail; else placeholder">
+          <ion-img [src]="thumbnail" class="thumbnail-img"></ion-img>
+        </ng-container>
+        <ng-template #placeholder>
+          <div class="placeholder-content ion-text-center">
+            <ion-icon name="image-outline" color="medium"></ion-icon>
+            <ion-text color="medium">
+              <p>Aperçu de l'image</p>
+            </ion-text>
+          </div>
+        </ng-template>
+      </div>
 
       <input
         type="file"
@@ -70,22 +65,40 @@
         #fileInput
       />
 
-      <ion-button class="select-button" expand="block" fill="outline" (click)="fileInput.click()">
-          <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
-          Sélectionner une Image
-       </ion-button>
-
+      <ion-button expand="block" fill="outline" class="spotify-button-outline" (click)="fileInput.click()">
+        <ion-icon slot="start" name="cloud-upload-outline"></ion-icon>
+        Sélectionner une Image
+      </ion-button>
     </ion-card-content>
   </ion-card>
 
-  <ion-button
-       class="validate-button"
-       expand="block"
-       (click)="validateImage()"
-       [disabled]="!thumbnail"
-     >
-       <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
-       Étape 2 : Valider et Générer
-     </ion-button>
+  <div class="validation-section">
+    <ion-button
+      *ngIf="thumbnail"
+      expand="block"
+      [disabled]="!(authService.isPremium$ | async)"
+      (click)="validateImage()"
+      class="spotify-button"
+    >
+      <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
+      <ng-container *ngIf="authService.isPremium$ | async; else needPremium">
+        Étape 2 : Valider et Générer
+      </ng-container>
+      <ng-template #needPremium>
+        Génération Premium Requise
+      </ng-template>
+    </ion-button>
 
+    <ion-card *ngIf="thumbnail && !(authService.isPremium$ | async)" class="glass-card netflix-alert">
+      <ion-card-content class="ion-text-center">
+        <ion-icon name="lock-closed-outline" class="alert-icon"></ion-icon>
+        <ion-text color="danger">
+          <p>La génération d'images est une fonctionnalité réservée aux membres Premium.</p>
+        </ion-text>
+        <ion-button fill="solid" class="netflix-button" size="small" (click)="goToSubscriptionPage()">
+          Devenir Premium
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </ion-content>

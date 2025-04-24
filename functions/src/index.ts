@@ -1,144 +1,22 @@
-import { onRequest } from "firebase-functions/v2/https";
-import { defineSecret } from "firebase-functions/params";
-import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
-import OpenAI from "openai";
-import cors from 'cors';
 
+// ========================================================================
+// Initialisation Firebase Admin SDK (Une seule fois)
+// ========================================================================
 admin.initializeApp();
 
-const openaiApiKeyParam = defineSecret("OPENAI_KEY");
+// ========================================================================
+// Exportation des fonctions depuis leurs fichiers dédiés
+// ========================================================================
 
-const allowedOrigins = [
-    'https://4200-idx-starterpack-appgit-1745011088232.cluster-jbb3mjctu5cbgsi6hwq6u4btwe.cloudworkstations.dev',
-    // Ajoutez ici l'URL de votre application déployée si nécessaire
-    // 'https://votre-app-deployée.web.app'
-];
+// Exportez la fonction de génération d'image
+export * from "./handlers/generateImageStarterPack";
 
-const corsOptions: cors.CorsOptions = {
-    origin: (origin, callback) => {
-        logger.info(`CORS Check: Request origin: ${origin}`);
-        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            logger.info(`CORS Check: Origin allowed.`);
-            callback(null, true);
-        } else {
-            logger.error(`CORS Check: Origin blocked: ${origin}`);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    methods: "POST, GET, OPTIONS",
-    allowedHeaders: "Content-Type, Authorization",
-};
+// Exportez la fonction d'accès premium
+export * from "./handlers/grantPremiumAccess"; // <- NOUVELLE LIGNE
 
-const corsHandler = cors(corsOptions);
+// ========================================================================
+// Ajoutez d'autres exports de fonctions ici au fur et à mesure
+// export * from "./handlers/votreAutreFonction";
+// ========================================================================
 
-export const generateImage = onRequest(
-  {
-    region: "us-central1",
-    timeoutSeconds: 120,
-    memory: "1GiB",
-    secrets: [openaiApiKeyParam],
-  },
-  (request, response) => {
-      logger.info(`Request received: Method=${request.method}, Origin=${request.headers.origin}`);
-
-      corsHandler(request, response, async () => {
-          logger.info("CORS handler passed, entering main async logic.");
-          let openai: OpenAI;
-
-          try {
-              logger.info("Attempting to initialize OpenAI client...");
-              try {
-                  openai = new OpenAI({ apiKey: openaiApiKeyParam.value() });
-                  logger.info("OpenAI client initialized successfully.");
-              } catch (initErr: any) {
-                  logger.error("!!! Failed to initialize OpenAI client inside handler.", { error: initErr.message });
-                  throw new Error("Server configuration error: Cannot initialize OpenAI.");
-              }
-
-              const { userId, image } = request.body;
-              logger.info(`Processing request for userId: ${userId}`);
-
-              if (!userId || !image) {
-                logger.warn("Missing userId or image in request body.");
-                response.status(400).send({ error: "Missing userId or image in body." });
-                return;
-              }
-
-              const base64 = image.includes(",") ? image.split(",")[1] : image;
-              const imageBuffer = Buffer.from(base64, "base64");
-              const timestamp = Date.now();
-              const bucket = admin.storage().bucket();
-              const originalPath = `images/original/${userId}/${timestamp}.jpg`;
-              const originalFile = bucket.file(originalPath);
-
-              logger.info(`Uploading original image to ${originalPath}`);
-              await originalFile.save(imageBuffer, { contentType: "image/jpeg" });
-
-              const [originalUrl] = await originalFile.getSignedUrl({
-                action: "read",
-                expires: "03-09-2491",
-              });
-              logger.info(`Original image URL: ${originalUrl}`);
-
-              const prompt = "A cute blue cat wearing a top hat";
-
-              logger.info(`Calling OpenAI DALL-E 3 for user ${userId}`);
-              const result = await openai.images.generate({
-                model: "dall-e-3",
-                prompt,
-                n: 1,
-                size: "1024x1024",
-                response_format: "b64_json",
-              });
-
-              const generatedB64 = result.data[0]?.b64_json;
-
-              if (!generatedB64) {
-                logger.error("No image data returned by OpenAI.", { resultData: result.data });
-                throw new Error("No image returned by OpenAI.");
-              }
-              logger.info(`Image successfully generated by OpenAI`);
-
-              const generatedBuffer = Buffer.from(generatedB64, "base64");
-              const generatedPath = `images/generated/${userId}/${timestamp}.jpg`;
-              const generatedFile = bucket.file(generatedPath);
-
-              logger.info(`Uploading generated image to ${generatedPath}`);
-              await generatedFile.save(generatedBuffer, { contentType: "image/jpeg" });
-
-              const [generatedUrl] = await generatedFile.getSignedUrl({
-                action: "read",
-                expires: "03-09-2491",
-              });
-              logger.info(`Generated image URL: ${generatedUrl}`);
-
-              logger.info(`Saving metadata to Firestore for user ${userId}`);
-              await admin.firestore().collection("images").add({
-                userId,
-                originalImageUrl: originalUrl,
-                generatedImageUrl: generatedUrl,
-                prompt,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-              });
-
-              logger.info(`Successfully processed request for user ${userId}`);
-              response.status(200).send({ generatedImageUrl: generatedUrl });
-
-          } catch (err: any) {
-              logger.error("!!! Error during function execution", {
-                userId: request.body?.userId,
-                message: err.message,
-                stack: err.stack,
-                ...(err.response?.data && { openAIError: err.response.data }),
-              });
-              const clientErrorMessage = err.message.includes("Cannot initialize OpenAI")
-                 ? "Server configuration error."
-                 : err.message || "Unexpected error during image generation";
-              response.status(500).send({ error: clientErrorMessage });
-          }
-      });
-      // Note: Logging after the async corsHandler callback might execute before the callback finishes.
-      // logger.info("Exiting main onRequest handler function.");
-  }
-);

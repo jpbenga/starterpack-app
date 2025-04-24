@@ -1,37 +1,44 @@
-<ion-header [translucent]="true">
-  <ion-toolbar color="primary">
-    <ion-buttons slot="start">
+<ion-header class="ion-no-border modern-toolbar">
+  <ion-toolbar> <ion-buttons slot="start">
       <ion-back-button defaultHref="/home" text="Accueil"></ion-back-button>
     </ion-buttons>
-    <ion-title>Ma Bibliothèque</ion-title>
+    <ion-title class="modern-title">Ma Bibliothèque</ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="ion-padding">
-  <div *ngIf="isLoading" class="ion-text-center ion-padding">
-    <ion-spinner name="crescent"></ion-spinner>
-    <p>Chargement des images...</p>
+<ion-content [fullscreen]="true" class="ion-padding modern-content">
+
+  <div *ngIf="isLoading" class="ion-text-center ion-padding loading-container">
+    <ion-spinner name="crescent" color="primary"></ion-spinner> <p>Chargement des images...</p>
   </div>
 
   <ng-container *ngIf="images$ | async as images">
 
-    <div *ngIf="!isLoading && images.length === 0" class="ion-text-center ion-padding">
-      <ion-icon name="images-outline" size="large" color="medium"></ion-icon>
+    <div *ngIf="!isLoading && images.length === 0" class="ion-text-center ion-padding empty-state-container">
+      <ion-icon name="images-outline" size="large" class="empty-state-icon"></ion-icon>
       <p>Vous n'avez pas encore généré d'images.</p>
-      <ion-button routerLink="/home" fill="clear">Générer ma première image</ion-button>
+      <ion-button routerLink="/home" fill="outline" class="spotify-button-outline">
+        Générer ma première image
+      </ion-button>
     </div>
 
     <ion-grid *ngIf="!isLoading && images.length > 0">
       <ion-row>
         <ion-col size="12" size-md="6" size-lg="4" *ngFor="let img of images">
-          <ion-card class="image-card">
-            <img [src]="img.generatedImageUrl" alt="Image générée" class="generated-image" />
+          <ion-card class="glass-card image-card">
+            <ion-img
+              [src]="img.generatedImageUrl"
+              alt="Image générée"
+              class="generated-image">
+            </ion-img>
             <ion-card-header>
-              <ion-card-subtitle>{{ img.createdAt?.toDate() | date:'dd/MM/yyyy HH:mm' }}</ion-card-subtitle>
+              <ion-card-subtitle class="image-date">
+                {{ img.createdAt?.toDate() | date:'dd/MM/yyyy HH:mm' }}
+              </ion-card-subtitle>
             </ion-card-header>
-             <ion-card-content>
-                <p><small>Prompt utilisé : {{ img.prompt | slice:0:100 }}{{ img.prompt.length > 100 ? '...' : ''}}</small></p>
-              </ion-card-content>
+             <ion-card-content class="image-prompt">
+               <p><small>Prompt : {{ img.prompt | slice:0:100 }}{{ img.prompt.length > 100 ? '...' : ''}}</small></p>
+             </ion-card-content>
           </ion-card>
         </ion-col>
       </ion-row>
@@ -39,4 +46,4 @@
 
   </ng-container>
 
-  </ion-content>
+</ion-content>

@@ -33,7 +33,9 @@
     "cordova-admob-sdk": "^0.24.1",
     "cordova-plugin-admob-free": "^0.27.0",
     "cordova-promise-polyfill": "^0.0.2",
+    "firebase-functions": "^6.3.2",
     "ionicons": "^7.0.0",
+    "openai": "^4.95.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

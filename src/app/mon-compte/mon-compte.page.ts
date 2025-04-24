@@ -106,8 +106,8 @@ export class MonComptePage implements OnInit, OnDestroy {
 
      try {
          console.log('MonComptePage: Attempting to show banner ad');
-         const loadedHandle = await AdMob.addListener(BannerAdPluginEvents.Loaded, (info: AdLoadInfo) => { console.log('MonCompte Banner Ad Loaded', info); });
-         const failedLoadHandle = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad, (error: any) => { console.error('MonCompte Banner Ad Failed to Load', error); });
+         const loadedHandle = await AdMob.addListener(BannerAdPluginEvents.Loaded as any, (info: AdLoadInfo) => { console.log('MonCompte Banner Ad Loaded', info); });
+         const failedLoadHandle = await AdMob.addListener(BannerAdPluginEvents.FailedToLoad as any, (error: any) => { console.error('MonCompte Banner Ad Failed to Load', error); });
          this.bannerListeners.push(loadedHandle, failedLoadHandle);
 
          await AdMob.showBanner(options);

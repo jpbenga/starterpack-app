@@ -1,47 +1,201 @@
-/* Ajoute un peu d'espace autour de la carte principale */
-ion-card {
-  margin-top: 20px;
-  margin-bottom: 30px;
+// styles.scss - Dark Mode inspiré de Spotify & Netflix avec glassmorphisme
+
+// Définition des variables CSS globales (si ce n'est pas déjà fait ailleurs, ex: :root dans global.scss)
+// Si c'est dans global.scss, cette section n'est pas nécessaire ici.
+:host { // Utiliser :host pour les variables spécifiques au composant si nécessaire
+  --color-bg: #121212;
+  --color-surface: #1e1e1e;
+  --color-primary: #1db954; // Vert Spotify
+  --color-primary-rgb: 29, 185, 84; // Composantes RGB pour rgba
+  --color-alert: #e50914; // Rouge Netflix
+  --color-text: #f5f5f5;
+  --color-glass: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(255, 255, 255, 0.15);
+  --color-shadow: rgba(0, 0, 0, 0.3);
+  --color-medium: rgba(245, 245, 245, 0.6); // Couleur medium pour placeholders etc.
 }
 
-/* Style pour le conteneur de la miniature */
-.thumbnail-container {
-  margin-top: 25px; /* Espace au-dessus de la miniature */
-  margin-bottom: 15px;
-  display: flex; /* Utilisation de flex pour centrer facilement */
-  justify-content: center; /* Centrage horizontal */
-  align-items: center; /* Centrage vertical */
-  background-color: var(--ion-color-light-tint); /* Fond léger pour délimiter */
-  border-radius: 10px; /* Coins arrondis */
-  padding: 10px;
-  min-height: 150px; /* Hauteur minimale pour la zone même vide */
-  border: 1px dashed var(--ion-color-medium-shade); /* Bordure discrète */
+// Styles généraux du contenu de la page
+.modern-content {
+  --background: var(--color-bg); // Appliquer le fond sombre au contenu
+  color: var(--color-text);
 }
 
-/* Style pour l'image miniature elle-même */
-.thumbnail-img {
-  max-width: 100%; /* S'assure que l'image ne dépasse pas le conteneur */
-  max-height: 250px; /* Limite la hauteur maximale */
-  border-radius: 6px; /* Coins légèrement arrondis pour l'image */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre portée subtile */
-  object-fit: cover; /* S'assure que l'image couvre bien sans se déformer */
+// Style spécifique au header/toolbar (si nécessaire)
+.modern-toolbar {
+  --background: var(--color-surface); // Ou var(--color-bg) selon l'effet désiré
+  color: var(--color-text);
+  ion-title.modern-title {
+    color: var(--color-text); // Assurer la couleur du titre
+    font-weight: bold;
+  }
+  ion-button { // Style des boutons dans le header
+    --color: var(--color-text); // Icônes en blanc cassé
+  }
+  .premium-icon { // Style pour l'icône étoile premium
+    color: #ffd700; // Couleur or pour l'étoile
+    margin-right: 5px;
+    vertical-align: middle;
+    font-size: 1.1em;
+  }
 }
 
-/* Style pour les instructions et textes */
+// Style de la carte principale avec effet glassmorphism
+.glass-card {
+  background: var(--color-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); // Pour Safari
+  border-radius: 1rem; // 16px
+  border: 1px solid var(--color-border);
+  box-shadow: 0 8px 32px var(--color-shadow);
+  padding: 1rem; // Espacement intérieur
+  margin-top: 1rem; // Marge au-dessus
+  margin-bottom: 1.5rem; // Marge en dessous
+  color: var(--color-text); // Assurer la couleur du texte à l'intérieur
+}
+
+// Titre dans la carte
+.modern-step-title {
+  color: var(--color-text);
+  font-weight: 600; // Un peu plus gras
+  margin-bottom: 0.5rem;
+}
+
+// Instructions dans la carte
 .instructions {
-  color: var(--ion-color-medium-shade);
+  color: var(--color-medium); // Utiliser la couleur medium définie
   font-size: 0.9em;
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem; // Espacement avant la miniature
+  p { margin: 0; } // Retirer marge par défaut du paragraphe
 }
 
-/* Centrage du texte dans le header de la carte */
-ion-card-header ion-text {
-  display: block;
-  text-align: center;
-  font-weight: 500; /* Un peu plus de poids pour le titre/instruction principale */
+// Conteneur de la miniature
+.thumbnail-container {
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(var(--color-primary-rgb), 0.1); // Fond très léger avec la couleur primaire
+  border-radius: 10px;
+  padding: 10px;
+  min-height: 180px; // Augmenter un peu la hauteur
+  border: 1px dashed var(--color-border);
+  position: relative; // Pour positionner l'image
+  overflow: hidden; // Pour que l'image respecte les coins arrondis
 }
 
-/* Optionnel : Ajouter un léger effet au survol/focus sur les boutons */
-ion-button:hover {
+// Image miniature
+.thumbnail-img {
+  display: block; // Assurer un bon affichage
+  max-width: 100%;
+  max-height: 300px; // Limite hauteur
+  height: auto; // Garder le ratio
+  border-radius: 6px;
+  object-fit: cover; // Couvre la zone sans déformer
+}
+
+// Placeholder quand aucune image n'est sélectionnée
+.placeholder-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 150px; // Hauteur minimale du placeholder
+  ion-icon {
+    font-size: 3.5em; // Icône plus grande
+    margin-bottom: 8px;
+    color: var(--color-medium);
+  }
+  p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--color-medium);
+  }
+}
+
+// Assurer la hauteur minimale du conteneur même vide
+.thumbnail-container:not(.has-image) {
+   min-height: 180px;
+}
+
+// Style des boutons inspiré de Spotify
+.spotify-button, .spotify-button-outline {
+  --border-radius: 50px; // Très arrondi
+  font-weight: bold;
+  text-transform: uppercase; // Majuscules
+  letter-spacing: 0.5px; // Léger espacement
+  transition: transform 0.2s ease, opacity 0.2s ease; // Transitions douces
+  margin-top: 1rem; // Marge au-dessus des boutons principaux
+}
+
+.spotify-button {
+  --background: var(--color-primary);
+  --background-hover: var(--color-primary); // Garder la même couleur de fond
+  --background-activated: var(--color-primary);
+  --background-focused: var(--color-primary);
+  --color: #000000; // Texte noir sur fond vert
+}
+
+.spotify-button-outline {
+  --border-color: var(--color-primary);
+  --color: var(--color-primary);
+  --background-hover: rgba(var(--color-primary-rgb), 0.1); // Léger fond vert au survol
+  --background-activated: rgba(var(--color-primary-rgb), 0.15);
+  --background-focused: rgba(var(--color-primary-rgb), 0.1);
+}
+
+// *** CORRECTION ICI pour :hover ***
+// Appliquer un effet d'opacité ou de transformation au lieu de darken()
+.spotify-button:hover, .spotify-button-outline:hover {
+  opacity: 0.85; // Réduire légèrement l'opacité au survol
+  // Ou ajouter une transformation :
+  // transform: scale(1.02);
+}
+
+// Désactivation des boutons
+ion-button[disabled] {
+  opacity: 0.5; // Rendre plus transparent quand désactivé
+  cursor: not-allowed; // Curseur indiquant non autorisé
+}
+
+// Section de validation/alerte premium
+.validation-section {
+  margin-top: 1.5rem;
+}
+
+// Carte d'alerte Premium style Netflix
+.netflix-alert {
+  border-color: var(--color-alert); // Bordure rouge
+  background: rgba(229, 9, 20, 0.1); // Fond rouge très léger
+  .alert-icon {
+    color: var(--color-alert);
+    font-size: 2.5em; // Icône plus grande
+    margin-bottom: 0.5rem;
+  }
+  ion-text p {
+    color: var(--color-text); // Texte en blanc cassé pour contraster
+    font-weight: 500;
+  }
+}
+
+// Bouton style Netflix
+.netflix-button {
+  --background: var(--color-alert);
+  --background-hover: var(--color-alert);
+  --background-activated: var(--color-alert);
+  --background-focused: var(--color-alert);
+  --color: var(--color-text); // Texte blanc
+  --border-radius: 4px; // Moins arrondi que Spotify
+  font-weight: bold;
+  text-transform: none; // Pas de majuscules
+  margin-top: 1rem; // Marge
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.netflix-button:hover {
   opacity: 0.9;
+  // transform: scale(1.02);
 }
+

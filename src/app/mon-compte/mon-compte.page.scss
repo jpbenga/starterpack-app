@@ -1,0 +1,196 @@
+// Importer les variables globales si nécessaire
+// @import '../../theme/variables.scss';
+
+// Utiliser :host pour définir des variables spécifiques si nécessaire
+:host {
+    // Réutiliser les variables définies dans home.page.scss ou global.scss
+    // --color-bg: #121212;
+    // --color-surface: #1e1e1e;
+    // --color-primary: #1db954;
+    // --color-primary-rgb: 29, 185, 84;
+    // --color-alert: #e50914;
+    // --color-text: #f5f5f5;
+    // --color-glass: rgba(255, 255, 255, 0.08);
+    // --color-border: rgba(255, 255, 255, 0.15);
+    // --color-shadow: rgba(0, 0, 0, 0.3);
+    // --color-medium: rgba(245, 245, 245, 0.6);
+    // --color-warning: #ffd700; // Or whatever warning color you prefer
+    // --color-success: #2dd36f; // Or Ionic's success color
+  }
+  
+  // Appliquer le fond sombre au contenu
+  ion-content.modern-content {
+    --background: var(--color-bg);
+    color: var(--color-text);
+  }
+  
+  // Style pour les cartes avec effet glassmorphism
+  ion-card.glass-card {
+    background: var(--color-glass);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 32px var(--color-shadow);
+    padding: 1rem;
+    margin-bottom: 1.5rem; // Espace entre les cartes
+    color: var(--color-text);
+  
+    ion-card-header {
+      padding-bottom: 0.5rem; // Réduire l'espace sous le header
+    }
+  
+    ion-card-title {
+      color: var(--color-text); // Assurer la couleur du titre
+      font-weight: 600;
+      display: flex; // Pour aligner l'icône
+      align-items: center;
+      gap: 0.5rem; // Espace entre icône et titre
+    }
+  
+    ion-card-subtitle {
+      margin-top: 0.25rem; // Espace au-dessus du sous-titre
+      font-size: 0.9em;
+      display: flex; // Pour aligner l'icône étoile
+      align-items: center;
+      gap: 0.3rem;
+      ion-icon[name="star"] {
+        color: var(--color-warning); // Couleur or pour l'étoile
+      }
+    }
+  
+    ion-card-content {
+      padding-top: 0.8rem; // Espace au-dessus du contenu
+    }
+  }
+  
+  // Style pour la carte d'alerte premium (style Netflix)
+  ion-card.netflix-alert {
+    border-color: var(--color-alert);
+    background: rgba(229, 9, 20, 0.1); // Fond rouge très léger
+  
+    ion-card-title {
+      color: var(--color-warning); // Titre en couleur warning (ou autre)
+      ion-icon {
+        color: var(--color-warning); // Icône étoile en couleur warning
+      }
+    }
+    ion-text p {
+      color: var(--color-text); // Texte standard
+      margin-bottom: 1rem; // Espace avant le bouton
+    }
+  }
+  
+  // Style pour la carte de débogage
+  .debug-section ion-card {
+    border-color: var(--color-medium); // Bordure grise
+    background: rgba(var(--ion-color-medium-rgb, 150, 150, 150), 0.1); // Fond gris léger
+  
+    ion-card-title {
+      color: var(--color-medium);
+      ion-icon {
+        color: var(--color-medium);
+      }
+    }
+    ion-text p {
+       margin-top: 0.5rem; // Espace au-dessus du petit texte
+    }
+  }
+  
+  
+  // Style pour les listes et items dans la carte d'info (transparents)
+  .transparent-list {
+    --background: transparent;
+    background: transparent;
+    padding: 0;
+    margin: 0; // Retirer marges par défaut
+  }
+  
+  .transparent-item {
+    --background: transparent;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    --border-width: 0 0 1px 0; // Ligne seulement en bas
+    --border-color: var(--color-border); // Utiliser la variable border
+    --highlight-color-focused: transparent;
+    padding-bottom: 0.5rem; // Espace sous l'item
+    margin-bottom: 0.5rem; // Espace entre les items
+  
+    &:last-child {
+       --border-width: 0; // Pas de bordure pour le dernier item
+       margin-bottom: 0;
+    }
+  
+    ion-icon[slot="start"] {
+      margin-right: 10px; // Espace après l'icône
+      // Utiliser la couleur primaire par défaut, sauf si spécifié autrement (ex: statut email)
+      color: var(--ion-color-primary, var(--color-primary));
+    }
+  
+    ion-label h2 {
+      font-size: 0.8em;
+      text-transform: uppercase;
+      color: var(--color-medium); // Titre de champ en gris clair
+      margin-bottom: 2px;
+    }
+    ion-label p {
+      font-size: 1em;
+      color: var(--color-text); // Valeur en blanc cassé
+      word-break: break-all; // Couper les longs ID
+    }
+    ion-label p small {
+      font-size: 0.85em; // Réduire la taille de l'ID
+      color: var(--color-medium);
+    }
+  }
+  
+  // Styles pour les boutons (réutiliser les styles Spotify/Netflix si définis globalement)
+  
+  // Bouton style Netflix (si non global)
+  .netflix-button {
+    --background: var(--color-alert);
+    --background-hover: var(--color-alert);
+    --background-activated: var(--color-alert);
+    --background-focused: var(--color-alert);
+    --color: var(--color-text);
+    --border-radius: 4px;
+    font-weight: bold;
+    text-transform: none;
+    margin-top: 1rem;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  
+  // Bouton style Spotify Outline (si non global)
+  .spotify-button-outline {
+    --border-color: var(--color-primary);
+    --color: var(--color-primary);
+    --border-radius: 50px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    --background-hover: rgba(var(--color-primary-rgb), 0.1);
+    --background-activated: rgba(var(--color-primary-rgb), 0.15);
+    --background-focused: rgba(var(--color-primary-rgb), 0.1);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    margin-top: 1rem;
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+  
+  // Ajuster le header (si non défini globalement)
+  .modern-toolbar {
+    --background: var(--color-surface);
+    color: var(--color-text);
+    ion-title.modern-title {
+      color: var(--color-text);
+      font-weight: bold;
+    }
+    ion-button, ion-back-button {
+      --color: var(--color-text);
+    }
+  }
+  
