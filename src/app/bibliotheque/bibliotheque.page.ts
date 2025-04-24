@@ -5,7 +5,7 @@ import {
   IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
   IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
   IonIcon, IonButton, Platform,
-  IonImg // <<< Importé ici
+  IonImg
 } from '@ionic/angular/standalone';
 import { Observable, of, Subscription } from 'rxjs';
 import { switchMap, catchError, tap, take } from 'rxjs/operators';
@@ -14,7 +14,7 @@ import { imagesOutline, arrowBackOutline } from 'ionicons/icons';
 import { AuthService } from '../services/auth.service';
 import { FirestoreService, GeneratedImageData } from '../services/firestore.service';
 import { AdMob, AdOptions, BannerAdOptions, BannerAdSize, BannerAdPosition, BannerAdPluginEvents, AdLoadInfo } from '@capacitor-community/admob';
-import { PluginListenerHandle } from '@capacitor/core';
+import { PluginListenerHandle } from '@capacitor/core'; // Assurez-vous que ce type est correct
 
 @Component({
   selector: 'app-bibliotheque',
@@ -27,7 +27,7 @@ import { PluginListenerHandle } from '@capacitor/core';
     IonHeader, IonToolbar, IonButtons, IonBackButton, IonTitle, IonContent, IonSpinner,
     IonGrid, IonRow, IonCol, IonCard, IonCardHeader, IonCardSubtitle, IonCardContent,
     IonIcon, IonButton,
-    IonImg, // <<< Ajouté ici dans le tableau imports
+    IonImg,
     DatePipe
    ]
 })
@@ -38,7 +38,7 @@ export class BibliothequePage implements OnInit, OnDestroy {
   userId: string | null = null;
   isPremium = false;
   private authSubscription: Subscription | null = null;
-  // AdMob Listeners - Correction type si nécessaire
+  private premiumStatusSubscription: Subscription | null = null; // Ajouté pour gérer isPremium$
   private bannerListeners: PluginListenerHandle[] = [];
 
   constructor(
@@ -50,30 +50,28 @@ export class BibliothequePage implements OnInit, OnDestroy {
    }
 
   ngOnInit() {
+    // Utiliser premiumStatusSubscription pour suivre isPremium$
+    this.premiumStatusSubscription = this.authService.isPremium$.subscribe(isPremium => {
+        this.isPremium = isPremium;
+        console.log('BibliothequePage: User premium status updated:', this.isPremium);
+        // Gérer la bannière AdMob en fonction du statut premium
+        if (!this.isPremium) {
+            this.showBannerAd();
+        } else {
+            this.hideAndRemoveBanner();
+        }
+    });
+
+    // Charger les images en fonction de l'utilisateur connecté
     this.authSubscription = this.authService.user$.subscribe(user => {
-        // Utiliser forceClaimRefresh pour être sûr d'avoir les derniers claims
-        this.authService.forceClaimRefresh().then(isPremium => {
-            this.isPremium = isPremium;
-            console.log('BibliothequePage: User premium status:', this.isPremium);
-            this.loadImages(user?.uid); // Charger les images après avoir le statut
-            // Gérer la bannière AdMob en fonction du statut premium
-            if (!this.isPremium) {
-                this.showBannerAd();
-            } else {
-                this.hideAndRemoveBanner();
-            }
-        }).catch(err => {
-            console.error("BibliothequePage: Error getting token results for premium check", err);
-            this.isPremium = false; // Assumer non premium en cas d'erreur
-            this.loadImages(user?.uid);
-            this.showBannerAd(); // Montrer la bannière si erreur
-        });
+        this.loadImages(user?.uid);
     });
   }
 
   ngOnDestroy() {
      this.authSubscription?.unsubscribe();
-     this.removeBannerListeners(); // Nettoyer les listeners spécifiques à la bannière
+     this.premiumStatusSubscription?.unsubscribe(); // Se désabonner
+     this.removeBannerListeners();
      this.hideAndRemoveBanner();
   }
 
@@ -81,36 +79,35 @@ export class BibliothequePage implements OnInit, OnDestroy {
     this.isLoading = true;
     if (uid) {
         this.userId = uid;
-        // Si l'utilisateur n'est pas premium, on ne charge pas les images (ou on affiche un message)
-        // Car les règles de sécurité devraient bloquer l'accès de toute façon
-        if (!this.isPremium) {
-            console.log("BibliothequePage: User is not premium. Not loading images.");
-            this.images$ = of([]); // Retourner un tableau vide
-            this.isLoading = false;
-            // Optionnel: Afficher un message indiquant que l'accès est réservé aux premiums
-            return;
-        }
-        // Si premium, charger les images
+        console.log(`BibliothequePage: Loading images for user ${uid}`); // Log ajouté
+
+        // *** CORRECTION ICI : Retrait de la condition !this.isPremium ***
+        // Charger les images pour l'utilisateur, les règles Firestore gèrent la permission
         this.images$ = this.firestoreService.getUserImages(uid).pipe(
-            tap(() => this.isLoading = false),
-            catchError(error => {
-                console.error('Erreur lors du chargement des images:', error);
-                // Gérer l'erreur (ex: permission refusée par les règles Firestore)
+            tap((data) => {
+                console.log(`BibliothequePage: Images loaded successfully for user ${uid}`, data); // Log succès
                 this.isLoading = false;
+            }),
+            catchError(error => {
+                console.error(`Erreur lors du chargement des images pour ${uid}:`, error);
+                this.isLoading = false;
+                // Afficher un message d'erreur ou simplement un tableau vide
+                // Peut-être une permission refusée si les règles ne sont pas bonnes
                 return of([]);
             })
         );
     } else {
-        console.warn('Bibliotheque: Aucun UID utilisateur trouvé pour charger les images.');
+        console.warn('Bibliotheque: Aucun UID utilisateur trouvé. Cannot load images.');
         this.images$ = of([]);
         this.isLoading = false;
     }
   }
 
+
   ionViewWillEnter() {
      console.log('ionViewWillEnter BibliothequePage, isPremium:', this.isPremium);
-     // Le statut premium est maintenant géré dans ngOnInit via forceClaimRefresh
-     // La logique AdMob est aussi dans ngOnInit
+     // Rafraîchir les claims pour s'assurer que le statut est à jour pour AdMob
+     this.authService.forceClaimRefresh();
   }
 
   ionViewWillLeave() {

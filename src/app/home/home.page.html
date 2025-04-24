@@ -76,25 +76,17 @@
     <ion-button
       *ngIf="thumbnail"
       expand="block"
-      [disabled]="!(authService.isPremium$ | async)"
       (click)="validateImage()"
       class="spotify-button"
     >
       <ion-icon slot="start" name="checkmark-done-outline"></ion-icon>
-      <ng-container *ngIf="authService.isPremium$ | async; else needPremium">
-        Étape 2 : Valider et Générer
-      </ng-container>
-      <ng-template #needPremium>
-        Génération Premium Requise
-      </ng-template>
+      Étape 2 : Valider et Générer
     </ion-button>
 
     <ion-card *ngIf="thumbnail && !(authService.isPremium$ | async)" class="glass-card netflix-alert">
       <ion-card-content class="ion-text-center">
         <ion-icon name="lock-closed-outline" class="alert-icon"></ion-icon>
-        <ion-text color="danger">
-          <p>La génération d'images est une fonctionnalité réservée aux membres Premium.</p>
-        </ion-text>
+        <ion-text color="danger"> <p>Passez Premium pour une qualité d'image HD et pour nous soutenir !</p> </ion-text>
         <ion-button fill="solid" class="netflix-button" size="small" (click)="goToSubscriptionPage()">
           Devenir Premium
         </ion-button>

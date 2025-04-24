@@ -16,8 +16,7 @@ service cloud.firestore {
 
     match /images/{imageId} {
       allow read: if request.auth != null
-                   && resource.data.userId == request.auth.uid
-                   && request.auth.token.premium == true;
+                   && resource.data.userId == request.auth.uid;
       allow create, update, delete: if false;
     }
 

@@ -68,11 +68,8 @@ export class HomePage implements OnInit, OnDestroy {
       console.log('HomePage: User premium status updated:', this.isPremium);
       if (!this.isPremium) {
         this.prepareInterstitial();
-        // Note: Banner Ad logic was removed from this component's TS,
-        // assuming it's handled elsewhere or not needed on this page now.
       } else {
-        // If user becomes premium, ensure ads are cleaned up if they were shown
-        this.hideAndRemoveBanner(); // Call cleanup just in case
+        this.hideAndRemoveBanner(); // Nettoyer les pubs si premium
       }
     });
   }
@@ -80,20 +77,18 @@ export class HomePage implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.premiumStatusSubscription?.unsubscribe();
     this.removeInterstitialListeners();
-    this.hideAndRemoveBanner(); // Ensure cleanup on destroy
+    this.hideAndRemoveBanner();
   }
 
   ionViewWillEnter() {
     console.log('ionViewWillEnter HomePage, isPremium:', this.isPremium);
-    this.authService.forceClaimRefresh();
-    if (!this.isPremium && !this.interstitialLoaded) {
-      this.prepareInterstitial();
-    }
+    this.authService.forceClaimRefresh(); // Toujours rafraîchir
+    // La logique AdMob est gérée par l'abonnement ngOnInit
   }
 
   ionViewWillLeave() {
     console.log('ionViewWillLeave HomePage');
-    this.hideAndRemoveBanner(); // Ensure cleanup when leaving view
+    this.hideAndRemoveBanner();
   }
 
   onFileSelected(event: any) {
@@ -124,14 +119,17 @@ export class HomePage implements OnInit, OnDestroy {
 
   async validateImage() {
     console.log('validateImage called');
-    if (!this.isPremium) {
-      this.presentToast('La génération est réservée aux membres Premium.', 'warning', 'lock-closed-outline');
-      this.goToSubscriptionPage();
-      return;
-    }
+    // Retrait de la vérification if (!this.isPremium)
 
     const currentUserId = this.authService.getCurrentUserId();
-    if (!this.selectedFile || !currentUserId || !this.thumbnail) {
+    // Vérifier si l'utilisateur est connecté (anonyme ou non)
+    if (!currentUserId) {
+        this.presentToast('Veuillez vous connecter pour générer une image.', 'warning');
+        this.navigateToLogin(); // Rediriger vers la connexion
+        return;
+    }
+    // Vérifier si une image est sélectionnée
+    if (!this.selectedFile || !this.thumbnail) {
       this.presentToast('Veuillez sélectionner une image valide.', 'warning');
       return;
     }
@@ -150,8 +148,15 @@ export class HomePage implements OnInit, OnDestroy {
       if (response?.generatedImageUrl) {
         console.log('API call successful. Generated image URL:', response.generatedImageUrl);
         await this.presentToast('Image générée avec succès !', 'success');
-        // Navigate to library or results page after successful generation
+
+        // Afficher l'interstitiel UNIQUEMENT si l'utilisateur n'est PAS premium
+        if (!this.isPremium) {
+            await this.showPreparedInterstitial();
+        }
+
+        // Naviguer vers la bibliothèque après succès (et après potentiel interstitiel)
         this.router.navigate(['/bibliotheque']);
+
       } else {
         console.error("Invalid response received from service:", response);
         throw new Error("La réponse reçue après génération est invalide.");
@@ -167,13 +172,9 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   // --- AdMob Methods ---
-  // Note: Banner logic might be removed or adjusted based on new design
-
   async showBannerAd() {
-    // This function might not be needed anymore if the design doesn't show banners here
     if (this.isPremium || !this.platform.is('capacitor')) return;
     console.log('HomePage: showBannerAd called (currently inactive)');
-    // Implementation removed as per previous context, reinstate if needed
   }
 
   async hideAndRemoveBanner() {
@@ -196,20 +197,22 @@ export class HomePage implements OnInit, OnDestroy {
   }
 
   async showPreparedInterstitial() {
-     if (this.isPremium || !this.platform.is('capacitor')) return;
+     if (this.isPremium || !this.platform.is('capacitor')) return; // Double vérification
      if (this.interstitialLoaded) {
        console.log('HomePage: Showing prepared interstitial ad...');
        try {
          await AdMob.showInterstitial();
-         this.interstitialLoaded = false;
-         this.prepareInterstitial(); // Preload next one
+         this.interstitialLoaded = false; // Marquer comme utilisé
+         // Précharger le suivant immédiatement
+         this.prepareInterstitial();
        } catch (err) {
          console.error('HomePage: Error showing interstitial ad', err);
          this.interstitialLoaded = false;
        }
      } else {
        console.log('HomePage: Interstitial ad was not loaded, skipping show.');
-       this.prepareInterstitial(); // Try to load for next time
+       // Essayer de le charger pour la prochaine fois
+       this.prepareInterstitial();
      }
   }
 
@@ -227,6 +230,7 @@ export class HomePage implements OnInit, OnDestroy {
         const dismissedHandle = await AdMob.addListener(InterstitialAdPluginEvents.Dismissed as any, () => {
           console.log('HomePage: Interstitial Ad Dismissed');
           this.interstitialLoaded = false;
+          // Précharger le suivant après fermeture
           if (!this.isPremium) this.prepareInterstitial();
         });
         const failedShowHandle = await AdMob.addListener(InterstitialAdPluginEvents.FailedToShow as any, (err: any) => {
@@ -235,6 +239,7 @@ export class HomePage implements OnInit, OnDestroy {
         });
         const showedHandle = await AdMob.addListener(InterstitialAdPluginEvents.Showed as any, () => {
           console.log('HomePage: Interstitial Ad Showed');
+          // L'interstitiel est affiché
         });
         this.interstitialListeners.push(loadedHandle, failedLoadHandle, dismissedHandle, failedShowHandle, showedHandle);
     } catch (error) {

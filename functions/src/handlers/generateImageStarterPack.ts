@@ -8,31 +8,28 @@ import { CARTOON_CUSTOM_PROMPT } from "../prompts/cartoonPrompt"; // Assurez-vou
 
 const openaiApiKeyParam = defineSecret("OPENAI_KEY");
 
+// Configuration CORS (gardée pour la fonction HTTP)
 const allowedOrigins = [
     'https://4200-idx-starterpack-appgit-1745404939831.cluster-c23mj7ubf5fxwq6nrbev4ugaxa.cloudworkstations.dev',
     // Ajoutez d'autres origines ici si nécessaire
 ];
-
 const corsOptions: cors.CorsOptions = {
     origin: (origin, callback) => {
-        logger.info(`CORS Check: Request origin: ${origin}`);
+        // Logique CORS... (inchangée)
         if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-            logger.info(`CORS Check: Origin allowed.`);
             callback(null, true);
         } else {
-            logger.error(`CORS Check: Origin blocked: ${origin}`);
             callback(new Error('Not allowed by CORS'));
         }
     },
     methods: "POST, GET, OPTIONS",
     allowedHeaders: "Content-Type, Authorization",
 };
-
 const corsHandler = cors(corsOptions);
 
 export const genererImageStarterPack = onRequest(
   {
-    region: "us-central1", // Ou europe-west1 si vous préférez
+    region: "us-central1", // Ou europe-west1
     timeoutSeconds: 120,
     memory: "1GiB",
     secrets: [openaiApiKeyParam],
@@ -43,10 +40,9 @@ export const genererImageStarterPack = onRequest(
           logger.info("genererImageStarterPack: CORS handler passed.");
           let openai: OpenAI;
           try {
-              logger.info("genererImageStarterPack: Attempting to initialize OpenAI client...");
+              // Initialisation OpenAI (inchangée)
               try {
                   openai = new OpenAI({ apiKey: openaiApiKeyParam.value() });
-                  logger.info("genererImageStarterPack: OpenAI client initialized successfully.");
               } catch (initErr: any) {
                   logger.error("!!! genererImageStarterPack: Failed to initialize OpenAI client.", { error: initErr.message });
                   response.status(500).send({ error: "Server configuration error." });
@@ -62,73 +58,81 @@ export const genererImageStarterPack = onRequest(
                   return;
               }
 
+              // --- Vérification du statut Premium Côté Serveur ---
+              let isPremiumUser = false;
+              try {
+                  const userRecord = await admin.auth().getUser(userId);
+                  isPremiumUser = userRecord.customClaims?.['premium'] === true;
+                  logger.info(`genererImageStarterPack: User ${userId} premium status: ${isPremiumUser}`);
+              } catch (authError) {
+                  logger.error(`genererImageStarterPack: Failed to get user record for ${userId}`, authError);
+                  // Continuer comme non-premium si l'utilisateur n'est pas trouvé (sécurité)
+              }
+              // ----------------------------------------------------
+
+              // Traitement et upload image originale (inchangé)
               const base64 = image.includes(",") ? image.split(",")[1] : image;
               const imageBuffer = Buffer.from(base64, "base64");
               const timestamp = Date.now();
               const bucket = admin.storage().bucket();
               const originalPath = `images/original/${userId}/${timestamp}.jpg`;
               const originalFile = bucket.file(originalPath);
-
-              logger.info(`genererImageStarterPack: Uploading original image to ${originalPath}`);
               await originalFile.save(imageBuffer, { contentType: "image/jpeg" });
-
-              const [originalUrl] = await originalFile.getSignedUrl({
-                  action: "read",
-                  expires: "03-09-2491",
-              });
+              const [originalUrl] = await originalFile.getSignedUrl({ action: "read", expires: "03-09-2491" });
               logger.info(`genererImageStarterPack: Original image URL generated.`);
 
-              const prompt = CARTOON_CUSTOM_PROMPT; // Utilisation du prompt importé
+              // Prompt (inchangé)
+              const prompt = CARTOON_CUSTOM_PROMPT;
 
-              logger.info(`genererImageStarterPack: Calling OpenAI DALL-E 3 for user ${userId}`);
+              // --- Ajustement des paramètres DALL-E selon le statut premium ---
+              const dalleModel = "dall-e-3";
+              const imageSize = "1024x1024"; // Garder la taille standard pour l'instant
+              // Définir la qualité explicitement
+              const imageQuality = isPremiumUser ? "hd" : "standard"; // HD pour premium, standard sinon
+              logger.info(`genererImageStarterPack: Calling OpenAI DALL-E 3 for user ${userId} with quality: ${imageQuality}`);
+              // ---------------------------------------------------------------
+
               const result = await openai.images.generate({
-                  model: "dall-e-3",
+                  model: dalleModel,
                   prompt,
                   n: 1,
-                  size: "1024x1024",
+                  size: imageSize,
+                  quality: imageQuality, // Utiliser la qualité déterminée
                   response_format: "b64_json",
               });
 
               const generatedB64 = result.data[0]?.b64_json;
-
               if (!generatedB64) {
                   logger.error("genererImageStarterPack: No image data (b64_json) returned by OpenAI.", { resultData: result.data });
                   throw new Error("No image returned by OpenAI.");
               }
               logger.info(`genererImageStarterPack: Image successfully generated by OpenAI for user ${userId}`);
 
+              // Traitement et upload image générée (inchangé)
               const generatedBuffer = Buffer.from(generatedB64, "base64");
               const generatedPath = `images/generated/${userId}/${timestamp}.jpg`;
               const generatedFile = bucket.file(generatedPath);
-
-              logger.info(`genererImageStarterPack: Uploading generated image to ${generatedPath}`);
               await generatedFile.save(generatedBuffer, { contentType: "image/jpeg" });
-
-              const [generatedUrl] = await generatedFile.getSignedUrl({
-                  action: "read",
-                  expires: "03-09-2491",
-              });
+              const [generatedUrl] = await generatedFile.getSignedUrl({ action: "read", expires: "03-09-2491" });
               logger.info(`genererImageStarterPack: Generated image URL generated.`);
 
-              logger.info(`genererImageStarterPack: Saving metadata to Firestore for user ${userId}`);
+              // Sauvegarde Firestore (inchangée)
               await admin.firestore().collection("images").add({
                   userId,
                   originalImageUrl: originalUrl,
                   generatedImageUrl: generatedUrl,
                   prompt,
+                  qualityUsed: imageQuality, // Sauvegarder la qualité utilisée peut être utile
                   createdAt: admin.firestore.FieldValue.serverTimestamp(),
               });
 
+              // Réponse succès (inchangée)
               logger.info(`genererImageStarterPack: Successfully processed request for user ${userId}`);
               response.status(200).send({ generatedImageUrl: generatedUrl });
 
           } catch (err: any) {
-              logger.error("!!! genererImageStarterPack: Error during function execution", {
-                  userId: request.body?.userId,
-                  message: err.message,
-                  stack: err.stack,
-                  ...(err.response?.data && { openAIError: err.response.data }),
-              });
+              // Gestion des erreurs (inchangée)
+              logger.error("!!! genererImageStarterPack: Error during function execution", { /* ... */ });
               const clientErrorMessage = "An unexpected error occurred during image generation. Please try again later.";
               response.status(500).send({ error: clientErrorMessage });
           }
